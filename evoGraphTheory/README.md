@@ -1,5 +1,16 @@
 # Overall Design
+In this simulation, I attempt to recreate the simulation done in [the science robotics paper](https://www.science.org/doi/10.1126/scirobotics.abf1416#pill-citations).
 
+The simulation animation is done with the python package [PyGame](https://www.pygame.org/wiki/GettingStarted)
+
+-	Packages used and versions:
+	- pygame 2.0.0 (SDL 2.0.12, python 3.8.9)
+
+- instruction on running simulation:
+	- in terminal, run
+		- `<python location> toy0.py`
+		- for me, it was `/usr/bin/python3 toy0.py`
+		- for you, it may simply be `python toy0.py` (check pygame and python versions, they can be annoying) 
 
 ## Parameters
 ### Agent
@@ -18,7 +29,7 @@
 - radius - 75
 
 ### Interactions
-- communication range: 20
+- communication range: 50
 - reset to NOIDEA with probability `1 - self.quality`
 
 ## Assumptions made

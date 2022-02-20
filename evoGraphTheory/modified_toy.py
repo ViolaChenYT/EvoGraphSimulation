@@ -1,69 +1,80 @@
-import random, math, pygame
+import sys, random, math, pygame
 import numpy as np
+import networkx as nx
+import matplotlib.pyplot as plt
+from networkx.drawing.nx_pydot import *
 
-## PARAMETERS
+'''PARAMETERS'''
 
-# duration of simulation
-n_iter = 1500
-# some global variables
-MAPSIZE = 600
+n_iter = 3000 
+'''duration of simulation'''
+
+MAPSIZE = 300
 # agent states
 NOIDEA = 0
 POLLING = 1
 COMMITTED = 2
 # agent param
-STEPSIZE = 3
-RADIUS = 10
+AGENT_STEPSIZE = 4
+AGENT_RADIUS = 10
 NROBOT = 20
-COMM_RANGE = 20
+COMM_RANGE = 50
 # sites param
 NSITE = 1
-SITE_RAD = 75
+SITE_RAD = 60
 # colors
-red = pygame.Color('#ff1744')
-yellow = pygame.Color('#FFEA00')
-purple = pygame.Color('#ea80fc')
-green = pygame.Color('#4caf50')
-blue = pygame.Color('#42a5f5')
+RED = pygame.Color('#ff1744')
+YELLOW = pygame.Color('#FFEA00')
+PURPLE = pygame.Color('#ea80fc')
+GREEN = pygame.Color('#4caf50')
+BLUE = pygame.Color('#42a5f5')
 
-# check if 2 centers of circle (a,b) are in range r, inrage => True
+
 def inrange(a,b,r):
+  '''check if 2 centers of circle (a,b) are in range r, inrage -> True
+  @params a, b: tuples, coordinate on a plane;
+  @param r: allowed distance between a and b
+  @ensures True if dist(a,b) <= r, False otherwise'''
   (x1,y1) = a
   (x2,y2) = b
   return (x1 - x2)**2 + (y1 - y2)**2 <= r**2
 
-# class for agent / robot
 class Agent():
-  # initialization
-  def __init__(self, id, server):
+  def __init__(self, id, server, faulty = False):
+    '''initialize agent'''
     self.id = id
     self.x = random.random() * MAPSIZE
     self.y = random.random() * MAPSIZE
-    self.r = 10
+    self.r = AGENT_RADIUS
     self.state = NOIDEA
     self.speculation = (-1, -1) # for cross inhib model
     self.opinion = (-1, -1) # should be location of commited site
     self.quality = -1 # have not seen any
     self.broadcasting = None
     self.server = server
+    self.faulty = faulty
 
   def __eq__(self, other):
     return self.id == other.id
 
   def move(self):
-    # if no idea, will move in a random directions for a fixed distance
+    '''if no idea, will move in a random directions for a fixed distance'''
+    
     if self.state in [NOIDEA, COMMITTED]:
+      stepsize = np.random.normal(1, AGENT_STEPSIZE)
       direction = random.random() * math.pi * 2 # all directions
-      dx = STEPSIZE * math.cos(direction)
-      dy = STEPSIZE * math.sin(direction)
+      dx = stepsize * math.cos(direction)
+      dy = stepsize * math.sin(direction)
     
     # in polling state, it will move in the general direction of the potential target, with variation of a standard normal in radian
     elif self.state == POLLING: # move towards target with some noise
+      stepsize = np.random.normal(1, AGENT_STEPSIZE)
       tmp = np.random.standard_normal()
-      xdiff, ydiff = max(0.001, self.speculation[0] - self.x), self.speculation[1] - self.y
-      theta = math.tanh(ydiff / xdiff) + tmp
-      dx = STEPSIZE * math.cos(theta)
-      dy = STEPSIZE * math.sin(theta)
+      xdiff, ydiff = self.speculation[0] - self.x, self.speculation[1] - self.y
+      theta = math.atan2(ydiff, xdiff) + tmp
+      dx = stepsize * math.cos(theta)
+      dy = stepsize * math.sin(theta)
+      
     self.x = (self.x + dx) % self.server.width
     self.y = (self.y + dy) % self.server.height
   
@@ -74,8 +85,9 @@ class Agent():
         self.broadcasting = self.opinion
       else: self.broadcasting = None
 
-  # randomly select a message among all robots in range that are broadcasting in that iteration
+  
   def receiveOpinion(self):
+    '''randomly select a message among all robots in range that are broadcasting in that iteration'''
     friendlist = []
     for friend in self.server.robots:
       if self == friend: continue
@@ -99,14 +111,14 @@ class Agent():
       self.state = POLLING
       self.speculation = message.broadcasting
 
-  # at every iteration, if an agent is in range of a target, it will sample the site quality with some probability of error
   def sample(self):
+    '''at every iteration, if an agent is in range of a target, it will sample the site quality with some probability of error'''
     for site in self.server.sites:
       if inrange((self.x,self.y),(site.x,site.y), site.radius + self.r):
         if random.random() < site.quality:
           self.state = COMMITTED
           self.opinion = (self.x, self.y)
-          self.quality = max(0.2 * np.random.standard_normal() + site.quality, 0,99999)
+          self.quality = max(0.2 * np.random.standard_normal() + site.quality, 0.99999)
           return
 
 class Target():
@@ -118,7 +130,7 @@ class Target():
     self.quality = quality
 
 class PygameGame(object):
-  def __init__(self, width = 600, height = 600, fps = 30, title = "simple simulation"):
+  def __init__(self, width = 600, height = 600, fps = 60, title = "simple simulation"):
     self.width = width
     self.height = height
     self.fps = fps
@@ -152,15 +164,27 @@ class PygameGame(object):
     # lastly, each makes their own move based on the information and updates in the latest iteration
     for robot in self.robots:
       robot.move()
+    n_poll, n_commit = 0,0
+    for robot in self.robots:
+      if robot.state == 1:
+        n_poll += 1
+      if robot.state == 2:
+        n_commit += 1
+    fp = n_poll / NROBOT
+    fc = n_commit / NROBOT
+    ff = 1 - fp - fc
+    frac_polling.append(fp)
+    frac_committed.append(fc)
+    frac_free.append(ff)
 
   def drawAll(self, screen): ## visualization
     for site in self.sites:
-      pygame.draw.circle(screen, red, (int(site.x), int(site.y)), site.radius)
+      pygame.draw.circle(screen, RED, (int(site.x), int(site.y)), site.radius)
 
     for robot in self.robots:
-      if robot.state == NOIDEA: color = green
-      elif robot.state == POLLING: color = yellow
-      else: color = blue
+      if robot.state == NOIDEA: color = GREEN
+      elif robot.state == POLLING: color = YELLOW
+      else: color = BLUE
       pygame.draw.circle(screen, color, (int(robot.x), int(robot.y)), robot.r)
       pygame.draw.circle(screen, (0,0,0), (int(robot.x), int(robot.y)), robot.r, True)
 
@@ -172,7 +196,7 @@ class PygameGame(object):
     screen.fill((255,255,255))
 
     cnt = 0
-    while cnt <= n_iter:
+    while cnt < n_iter:
       time = clock.tick(self.fps)
       cnt += 1
       self.timerFired(time) # invoke everything that are supposed to happen in one time step
@@ -181,6 +205,23 @@ class PygameGame(object):
       pygame.display.flip()
     pygame.quit()
 
-game = PygameGame()
-print("ready?")
-game.run()
+frac_free = []
+frac_polling = []
+frac_committed = []
+
+def run_trial():
+  game = PygameGame()
+  print("ready?")
+  game.run()
+
+  plt.plot(frac_free, label = 'no idea')
+  plt.plot( frac_polling, label = 'polling')
+  plt.plot( frac_committed, label = 'committed')
+  plt.ylabel("proportion of agents with each state")
+  plt.ylim(0,1)
+  plt.legend()
+  # Display a figure.
+  plt.savefig("./figures/2dnoadversary.jpg")
+
+if __name__ == '__main__':
+    run_trial()
