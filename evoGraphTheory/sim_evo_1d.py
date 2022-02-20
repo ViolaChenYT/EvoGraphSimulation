@@ -1,4 +1,4 @@
-import sys, random, math, pygame
+import random, math, pygame
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -24,10 +24,12 @@ NSITE = 1
 SITE_RAD = 75
 # colors
 RED = pygame.Color('#ff1744')
+PINK = pygame.Color('#E30B5C')
 YELLOW = pygame.Color('#FFEA00')
 PURPLE = pygame.Color('#ea80fc')
 GREEN = pygame.Color('#4caf50')
 BLUE = pygame.Color('#42a5f5')
+DARKBLUE = pygame.Color('#00008B')
 
 
 def inrange(a,b,r):
