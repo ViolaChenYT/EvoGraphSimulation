@@ -6,7 +6,7 @@ from networkx.drawing.nx_pydot import *
 
 '''PARAMETERS'''
 
-n_iter = 6000 
+n_iter = 8000 
 '''duration of simulation'''
 
 MAPSIZE = 400
@@ -64,9 +64,12 @@ class Agent():
     return self.id == other.id
 
   def move(self):
-    '''if no idea, will move in a random directions for a fixed distance'''
+    '''if self.state == NOIDEA / COMMITTED: simulate a brownian motion in 2D
+       otherwise: move towards speculation with noise of 0.1 standard normal,
+       stepsize also follows a normal distribution'''
     
     if self.state in [NOIDEA, COMMITTED]:
+      '''simulating  Brownian motion'''
       stepsize = np.random.normal(1, AGENT_STEPSIZE)
       direction = random.random() * math.pi * 2 # all directions
       dx = stepsize * math.cos(direction)
@@ -75,7 +78,7 @@ class Agent():
     # in polling state, it will move in the general direction of the potential target, 
     # with variation of a standard normal in radian
     elif self.state == POLLING: # move towards target with some noise
-      stepsize = np.random.normal(1, AGENT_STEPSIZE)
+      stepsize = np.random.normal(AGENT_STEPSIZE / 2, AGENT_STEPSIZE)
       tmp = np.random.standard_normal()
       xdiff, ydiff = self.speculation[0] - self.x, self.speculation[1] - self.y
       theta = math.atan2(ydiff, xdiff) + tmp
@@ -108,19 +111,20 @@ class Agent():
 
     # if robot in commited state, 
     # it retains its state with probability of the quality it sampled
+    rand_n = random.random()
     if self.state == COMMITTED and self.site != message.site:
-      if random.random() >= self.quality / total_qual:
+      if rand_n >= self.quality / total_qual:
+        print(rand_n)
         self.state = NOIDEA
         self.site = 0
     elif self.state == COMMITTED:
       return  
     else: # else enter polling state 
       if self.state == POLLING:
-        if random.random() >= self.quality / total_qual:
+        if rand_n >= self.quality / total_qual:
           self.speculation = message.broadcasting[0]
           self.quality = message.broadcasting[1]
-      else:
-        assert(self.state != COMMITTED)
+      else: # should be noidea here
         self.state = POLLING
         self.speculation = message.broadcasting[0]
         self.quality = message.broadcasting[1]
@@ -130,7 +134,15 @@ class Agent():
     it will sample the site quality with some random noise'''
     for site in self.server.sites:
       if inrange((self.x,self.y),site.loc, SITE_RAD):
-        if random.random() < site.quality:
+        if self.state == COMMITTED:
+          if not inrange(self.opinion, site.loc, SITE_RAD):
+            # if it's not my site
+            quality = max(np.random.normal(0,0.1) + site.quality, 0.99999)
+            if quality > self.quality or random.random() > 0.96:
+              self.opinion = (self.x, self.y)
+              self.site = site.id
+              self.quality = quality
+        elif random.random() < site.quality:
           self.state = COMMITTED
           self.opinion = (self.x, self.y)
           self.site = site.id
@@ -142,8 +154,8 @@ class Target():
     self.radius = SITE_RAD
     self.loc = (int(random.random() * MAPSIZE), int(random.random() * MAPSIZE))
     self.id = id + 1
-    if id == 0: self.quality = 0.7
-    else: self.quality = 0.3 # random.random()
+    if self.id == 1: self.quality = 0.8
+    else: self.quality = 0.2 # random.random()
 
 class PygameGame(object):
   def __init__(self, free, polling, right, wrong, width = 600, height = 600, fps = 60, title = "simulation"):
@@ -173,13 +185,12 @@ class PygameGame(object):
     best_site = 0
     best_quality = -1
     for i in range(NSITE):
-      q = random.random()
       site = Target(i)
       # make sure no overlap in site
-      while i > 0 and inrange(site.loc, self.sites[i-1].loc, SITE_RAD * 2):
+      while i > 0 and inrange(site.loc, self.sites[i-1].loc, SITE_RAD * 3):
         site = Target(i)
-      if q > best_quality:
-        best_quality = q
+      if site.quality > best_quality:
+        best_quality = site.quality
         best_site = i
       self.sites.append(site)
     self.best = best_site + 1
@@ -230,7 +241,6 @@ class PygameGame(object):
       pygame.draw.circle(screen, (0,0,0), (int(robot.x), int(robot.y)), robot.r, True)
 
   def run(self):
-    print("running")
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((self.width, self.height))
     pygame.display.set_caption(self.title)
