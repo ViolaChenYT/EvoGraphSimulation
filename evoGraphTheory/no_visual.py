@@ -4,7 +4,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from networkx.drawing.nx_pydot import *
 
-N_CHEATER = 0
+N_CHEATER = 5
 N_ITER = 6000 # per trial
 
 MAPSIZE = 400

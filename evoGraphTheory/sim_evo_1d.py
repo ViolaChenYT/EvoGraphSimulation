@@ -46,11 +46,11 @@ from no_visual import*
 VISUAL = False
 PLOT = True
 '''PARAMETERS'''
-N_TRIALS = 10 # per run
+N_TRIALS = 20 # per run
 n_keep = N_ITER # no. of frames to record
 
 # Evolution parameters
-GRAPH_SIZE = 5
+GRAPH_SIZE = 10
 N_GEN = 10 # for evolution
 MUTATION_RATE = 0.1
 WELLMIXED = 0
@@ -60,12 +60,9 @@ STAR = 2
 # generate simple graphs
 ringgraph = [[(i-1)%GRAPH_SIZE, (i+1)%GRAPH_SIZE] for i in range(GRAPH_SIZE)]
 stargraph = [[i for i in range(1,GRAPH_SIZE)]] + [0 for _ in range(GRAPH_SIZE-1)]
-print(ringgraph)
-print(stargraph)
 
 MAPSIZE = 400
 NSITE = 2
-
 
 RED = pygame.Color('#ff1744')
 PINK = pygame.Color('#E30B5C')
