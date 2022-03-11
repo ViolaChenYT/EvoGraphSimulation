@@ -1,164 +1,85 @@
-import random, math, pygame
+'''
+@author: Viola Chen
+
+
+@TODO: 2/21
+randomness seems to really play a part here, any way to get over that?
+like it is really supposed to converge etc intuitively, but many times it is not
+- try different cases of initial condition
+- squares? 
+- more adversary?
+
+@isses: 2/25
+- slower convergence
+- still susceptable to drift
+- this just reminds me to population genetics, is there anything i can do to uh minimize
+  drift?
+- use some sort of coverage algorithm?
+- it may not be optimal in this case
+  (randomize the x-y coordinate too)
+- resource utilization?
+
+@TODO: 2/25
+- every time there is a mutation, re-run simulation
+- have to normalize everyhting
+
+@TODO: 2/28
+- ask for cluster access
+- increase params
+  - graph_size: 5 -> 10
+  - repeats: 7 -> 10? 20?
+  - n_gen: 5 -> 50? 100?
+- confidence interval for the plots
+- plot some sort of fitness landscape (fitness against param)
+- use jupyter notebook 0. 0
+- make sure u don't select yourself in birthdeat
+- ring / star graph
+- when mutation happen, think about whether to mutate parent or child
+'''
+import random, math, pygame,time
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 from networkx.drawing.nx_pydot import *
+from no_visual import*
 
+VISUAL = False
+PLOT = True
 '''PARAMETERS'''
+N_TRIALS = 10 # per run
+n_keep = N_ITER # no. of frames to record
 
-n_iter = 8000 
-'''duration of simulation'''
+# Evolution parameters
+GRAPH_SIZE = 5
+N_GEN = 10 # for evolution
+MUTATION_RATE = 0.1
+WELLMIXED = 0
+RING = 1
+STAR = 2
+
+# generate simple graphs
+ringgraph = [[(i-1)%GRAPH_SIZE, (i+1)%GRAPH_SIZE] for i in range(GRAPH_SIZE)]
+stargraph = [[i for i in range(1,GRAPH_SIZE)]] + [0 for _ in range(GRAPH_SIZE-1)]
+print(ringgraph)
+print(stargraph)
 
 MAPSIZE = 400
-# agent states
-NOIDEA = 0
-POLLING = 1
-COMMITTED = 2
-# agent param
-AGENT_STEPSIZE = 3.5
-AGENT_RADIUS = 10
-NROBOT = 20
-COMM_RANGE = 60
-# sites param
 NSITE = 2
-SITE_RAD = 60
-# colors
+
+
 RED = pygame.Color('#ff1744')
 PINK = pygame.Color('#E30B5C')
 YELLOW = pygame.Color('#FFEA00')
 PURPLE = pygame.Color('#ea80fc')
 GREEN = pygame.Color('#4caf50')
 BLUE = pygame.Color('#42a5f5')
-DARKBLUE = pygame.Color('#00008B')
+DARKBLUE = pygame.Color('#00008B')            
 
 SITE_PALETTE = [RED, DARKBLUE]
 BOT_PALETTE = [PINK, BLUE]
 
-
-def inrange(a,b,r):
-  '''check if 2 centers of circle (a,b) are in range r, inrage -> True
-  @params a, b: tuples, coordinate on a plane;
-  @param r: allowed distance between a and b
-  @ensures True if dist(a,b) <= r, False otherwise'''
-  (x1,y1) = a
-  (x2,y2) = b
-  return (x1 - x2)**2 + (y1 - y2)**2 <= r**2
-
-class Agent():
-  def __init__(self, id, server, faulty = False):
-    '''initialize agent'''
-    self.id = id
-    self.x = random.random() * MAPSIZE
-    self.y = random.random() * MAPSIZE
-    self.r = AGENT_RADIUS
-    self.state = NOIDEA
-    self.speculation = (-1, -1) # for cross inhib model
-    self.opinion = (-1, -1) # should be location of commited site
-    self.site = 0 # id of the committed site?
-    self.quality = -1 # have not seen any
-    self.broadcasting = None
-    self.server = server
-    self.faulty = faulty
-
-  def __eq__(self, other):
-    return self.id == other.id
-
-  def move(self):
-    '''if self.state == NOIDEA / COMMITTED: simulate a brownian motion in 2D
-       otherwise: move towards speculation with noise of 0.1 standard normal,
-       stepsize also follows a normal distribution'''
-    
-    if self.state in [NOIDEA, COMMITTED]:
-      '''simulating  Brownian motion'''
-      stepsize = np.random.normal(1, AGENT_STEPSIZE)
-      direction = random.random() * math.pi * 2 # all directions
-      dx = stepsize * math.cos(direction)
-      dy = stepsize * math.sin(direction)
-    
-    # in polling state, it will move in the general direction of the potential target, 
-    # with variation of a standard normal in radian
-    elif self.state == POLLING: # move towards target with some noise
-      stepsize = np.random.normal(AGENT_STEPSIZE / 2, AGENT_STEPSIZE)
-      tmp = np.random.standard_normal()
-      xdiff, ydiff = self.speculation[0] - self.x, self.speculation[1] - self.y
-      theta = math.atan2(ydiff, xdiff) + tmp
-      dx = stepsize * math.cos(theta)
-      dy = stepsize * math.sin(theta)
-      
-    self.x = (self.x + dx) % self.server.width
-    self.y = (self.y + dy) % self.server.height
-  
-  def advertise(self):
-    '''committed cells broadcast their opinion with probability of the quality sampled'''
-    if self.state == COMMITTED and random.random() < self.quality:
-        self.broadcasting = (self.opinion, self.quality)
-    else: self.broadcasting = None
-
-  
-  def receiveOpinion(self):
-    '''randomly select a message among all robots in range that are broadcasting
-    in that iteration'''
-    friendlist = []
-    for friend in self.server.robots:
-      if self == friend: continue
-      if inrange((self.x,self.y), (friend.x, friend.y), COMM_RANGE):
-        if friend.broadcasting != None:
-          friendlist.append(friend)
-    if len(friendlist) == 0: 
-      return
-    message = random.choice(friendlist)
-    total_qual = self.quality + message.broadcasting[1]
-
-    # if robot in commited state, 
-    # it retains its state with probability of the quality it sampled
-    rand_n = random.random()
-    if self.state == COMMITTED and self.site != message.site:
-      if rand_n >= self.quality / total_qual:
-        print(rand_n)
-        self.state = NOIDEA
-        self.site = 0
-    elif self.state == COMMITTED:
-      return  
-    else: # else enter polling state 
-      if self.state == POLLING:
-        if rand_n >= self.quality / total_qual:
-          self.speculation = message.broadcasting[0]
-          self.quality = message.broadcasting[1]
-      else: # should be noidea here
-        self.state = POLLING
-        self.speculation = message.broadcasting[0]
-        self.quality = message.broadcasting[1]
-
-  def sample(self):
-    '''at every iteration, if an agent is in range of a target, 
-    it will sample the site quality with some random noise'''
-    for site in self.server.sites:
-      if inrange((self.x,self.y),site.loc, SITE_RAD):
-        if self.state == COMMITTED:
-          if not inrange(self.opinion, site.loc, SITE_RAD):
-            # if it's not my site
-            quality = max(np.random.normal(0,0.1) + site.quality, 0.99999)
-            if quality > self.quality or random.random() > 0.96:
-              self.opinion = (self.x, self.y)
-              self.site = site.id
-              self.quality = quality
-        elif random.random() < site.quality:
-          self.state = COMMITTED
-          self.opinion = (self.x, self.y)
-          self.site = site.id
-          self.quality = max(np.random.normal(0,0.1) + site.quality, 0.99999)
-          return
-
-class Target():
-  def __init__(self, id):
-    self.radius = SITE_RAD
-    self.loc = (int(random.random() * MAPSIZE), int(random.random() * MAPSIZE))
-    self.id = id + 1
-    if self.id == 1: self.quality = 0.8
-    else: self.quality = 0.2 # random.random()
-
 class PygameGame(object):
-  def __init__(self, free, polling, right, wrong, width = 600, height = 600, fps = 60, title = "simulation"):
+  def __init__(self, params, free, polling, right, wrong, width = 600, height = 600, fps = 60, title = "simulation"):
     self.width = width
     self.height = height
     self.fps = fps
@@ -170,6 +91,7 @@ class PygameGame(object):
     self.polling = polling
     self.right = right
     self.wrong = wrong
+    self.params = params
     self.initRobots()
     self.initSites()
     pygame.init()
@@ -177,7 +99,10 @@ class PygameGame(object):
   # initialize robots, assign each a unique ID
   def initRobots(self):
     for i in range(NROBOT):
-      robot = Agent(i, self)
+      if i < N_CHEATER:
+        robot = Agent(i, self, param = (self.params[i]),faulty = True)
+      else:
+        robot = Agent(i, self, param = (self.params[i]))
       self.robots.append(robot)
 
   # right now assign the site with a deterministic quality
@@ -197,15 +122,14 @@ class PygameGame(object):
 
   # things done at each iteration
   def timerFired(self, dt):
-    # each robot first sample, then those committed advertise, 
-    # and all robots check what they have received
+    '''each robot first sample, if they are committed, then they advertise, 
+     and all robots check what they have received
+     '''
     for robot in self.robots:
       robot.sample()
       robot.advertise()
     for robot in self.robots:
       robot.receiveOpinion()
-    # lastly, each makes their own move based on the information and 
-    # updates in the latest iteration
     for robot in self.robots:
       robot.move()
     n_poll, n_commit, n_correct = 0,0,0
@@ -237,17 +161,18 @@ class PygameGame(object):
       if robot.state == NOIDEA: color = GREEN
       elif robot.state == POLLING: color = YELLOW
       else: color = BOT_PALETTE[robot.site - 1]
+      if robot.faulty: edge_color = PURPLE
+      else: edge_color = (0,0,0)
       pygame.draw.circle(screen, color, (int(robot.x), int(robot.y)), robot.r)
-      pygame.draw.circle(screen, (0,0,0), (int(robot.x), int(robot.y)), robot.r, True)
+      pygame.draw.circle(screen, edge_color, (int(robot.x), int(robot.y)), robot.r, width = 1)
 
   def run(self):
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((self.width, self.height))
     pygame.display.set_caption(self.title)
     screen.fill((255,255,255))
-
     cnt = 0
-    while cnt < n_iter:
+    while cnt < N_ITER:
       time = clock.tick(self.fps)
       cnt += 1
       # invoke everything that are supposed to happen in one time step
@@ -258,28 +183,118 @@ class PygameGame(object):
       pygame.display.flip()
     pygame.quit()
 
-
-
-def run_trial():
+def run_trial(i, params):
   frac_free = []
   frac_polling = []
   frac_correct = []
   frac_wrong = []
-  game = PygameGame(frac_free, frac_polling, frac_correct, frac_wrong)
-  print("Red:", game.sites[0].quality)
-  print("Blue:", game.sites[1].quality)
-  print(game.best)
+  if VISUAL:
+    game = PygameGame(params, frac_free, frac_polling, frac_correct, frac_wrong)
+  else:
+    game = MyGame(params, frac_free, frac_polling, frac_correct, frac_wrong)
   game.run()
+  
+  corrects = np.array(frac_correct[-n_keep:]).reshape((n_keep,1))
+  pollings = np.array(frac_polling[-n_keep:]).reshape((n_keep,1))
+  wrongs = np.array(frac_wrong[-n_keep:]).reshape((n_keep,1))
+  frees = np.array(frac_free[-n_keep:]).reshape((n_keep,1))
+  return (frees, pollings, corrects, wrongs)
 
-  plt.plot(frac_free, label = 'no idea')
-  plt.plot( frac_polling, label = 'polling')
-  plt.plot( frac_correct, label = 'correct site')
-  plt.plot(frac_wrong, label = 'incorrect site')
-  plt.ylabel("proportion of agents with each state")
-  plt.ylim(0,1)
-  plt.legend()
-  # Display a figure.
-  plt.savefig("./figures/2dnoadversary.jpg")
+def next_gen(population, scores, model = WELLMIXED):
+  ''' take parameters and scores from the previous generation and produce the 
+      parameters for the next generation
+      @param: model: 
+  '''
+  prob = softmax(scores)
+  indices = [i for i in range(GRAPH_SIZE)]
+  if model == WELLMIXED:
+    for _ in range(GRAPH_SIZE):
+      tobirth = np.random.choice(indices, p=prob)
+      togo = np.random.randint(0, GRAPH_SIZE)
+      if np.random.uniform(0,1) < MUTATION_RATE:
+        (c1,c2) = population[tobirth]
+        c1 = c1 + np.random.normal(-0.1, 0.1)
+        c2 = 1 - c1
+        population[togo] = (c1,c2)
+      else:
+        population[togo] = population[tobirth]
+  elif model == STAR:
+    for _ in range(GRAPH_SIZE):
+      tobirth = np.random.choice(indices, p=prob)
+      togo = np.random.choice(stargraph[tobirth])
+      population[togo] = population[tobirth]
+      if np.random.uniform(0,1) < MUTATION_RATE:
+        (c1,c2) = population[tobirth]
+        c1 = c1 + np.random.normal(-0.1, 0.1)
+        c2 = 1 - c1
+        population[tobirth] = (c1,c2)
+  elif model == RING:
+    for _ in range(GRAPH_SIZE):
+      tobirth = np.random.choice(indices, p=prob)
+      togo = np.random.choice(ringgraph[tobirth])
+      population[togo] = population[tobirth]
+      if np.random.uniform(0,1) < MUTATION_RATE:
+        (c1,c2) = population[tobirth]
+        c1 = c1 + np.random.normal(-0.1, 0.1)
+        c2 = 1 - c1
+        population[tobirth] = (c1,c2)
+  else: 
+    print("PANIC! No evolution model selected")
+    raise Exception
+  return population
+
+def run_one_sim(param):
+  f, p, r, w = np.zeros((n_keep, 1)),np.zeros((n_keep, 1)),\
+                np.zeros((n_keep, 1)),np.zeros((n_keep, 1))  
+  params = [param for _ in range(NROBOT)]
+  for i in range(N_TRIALS):
+    (free, poll, right, wrong) = run_trial(i, params)
+    f = np.add(f, free)
+    p = np.add(p, poll)
+    r = np.add(r, right) 
+    w = np.add(w, wrong)
+  f = np.divide(f, N_TRIALS)
+  p = np.divide(p, N_TRIALS)
+  r = np.divide(r, N_TRIALS)
+  w = np.divide(w, N_TRIALS)
+  if PLOT:
+    plt.plot(f, label = 'no idea')
+    plt.plot( p, label = 'polling')
+    plt.plot( r, label = 'correct site')
+    plt.plot(w, label = 'incorrect site')
+    plt.ylabel("proportion of agents in each state")
+    plt.ylim(0,1)
+    plt.legend()
+    # Display a figure.
+    if N_CHEATER > 0:
+      plt.savefig(f"./figures/2d_{N_CHEATER}_adversary_average.jpg")
+    else: plt.savefig(f"./figures/2dnoadversary_average.jpg")
+  score = r[n_keep-1, 0]
+  return score
 
 if __name__ == '__main__':
-    run_trial()
+  tic = time.perf_counter()
+  '''initialize n = graph_size sets of parameters'''
+  all_scores = np.zeros((N_GEN,1))
+  rand = [np.random.uniform(0, 0.05) for _ in range(GRAPH_SIZE)]
+  params = [(1-r, r) for r in rand]
+  params = np.array(params,dtype="f,f")
+  print("param:", params)
+  # add some noise
+  for gen in range(N_GEN):
+    scores = np.zeros((GRAPH_SIZE, ))
+    for i in range(GRAPH_SIZE):
+      param = params[i]
+      score = run_one_sim(param)
+      scores[i] = score
+    '''maybe print the avg score of each generation'''
+    print(np.mean(scores))
+    all_scores[gen] = np.mean(scores)
+    params = next_gen(params, scores)
+  plt.clf()
+  plt.plot(all_scores)
+  plt.ylabel("best proportion of correct agents in each generation")
+  plt.ylim(0,1)
+  plt.savefig(f"./figures/{N_GEN}gen_{N_CHEATER}adv.jpg")
+  toc = time.perf_counter()
+  print(f"Duration: {toc - tic:0.4f} seconds")
