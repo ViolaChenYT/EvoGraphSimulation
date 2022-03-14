@@ -255,7 +255,9 @@ def run_one_sim(param):
   p = np.divide(p, N_TRIALS)
   r = np.divide(r, N_TRIALS)
   w = np.divide(w, N_TRIALS)
-  if PLOT:
+  score = r[n_keep-1, 0]
+
+  if PLOT and score > 0.3:
     plt.plot(f, label = 'no idea')
     plt.plot( p, label = 'polling')
     plt.plot( r, label = 'correct site')
@@ -267,8 +269,7 @@ def run_one_sim(param):
     if N_CHEATER > 0:
       plt.savefig(f"./figures/{MODEL}_{N_CHEATER}_adversary_{param[0]}_average.jpg")
     else: plt.savefig(f"./figures/{MODEL}_noadversary_average_{param[0]}.jpg")
-  score = r[n_keep-1, 0]
-  return score
+    return score
 
 if __name__ == '__main__':
   tic = time.perf_counter()
