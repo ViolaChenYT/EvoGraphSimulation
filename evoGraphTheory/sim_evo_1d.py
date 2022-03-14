@@ -46,16 +46,17 @@ from no_visual import*
 VISUAL = False
 PLOT = True
 '''PARAMETERS'''
-N_TRIALS = 20 # per run
+N_TRIALS = 15 # per run
 n_keep = N_ITER # no. of frames to record
 
 # Evolution parameters
 GRAPH_SIZE = 10
-N_GEN = 10 # for evolution
+N_GEN = 100 # for evolution
 MUTATION_RATE = 0.1
 WELLMIXED = 0
 RING = 1
 STAR = 2
+MODEL = STAR
 
 # generate simple graphs
 ringgraph = [[(i-1)%GRAPH_SIZE, (i+1)%GRAPH_SIZE] for i in range(GRAPH_SIZE)]
@@ -197,7 +198,7 @@ def run_trial(i, params):
   frees = np.array(frac_free[-n_keep:]).reshape((n_keep,1))
   return (frees, pollings, corrects, wrongs)
 
-def next_gen(population, scores, model = WELLMIXED):
+def next_gen(population, scores, model = MODEL):
   ''' take parameters and scores from the previous generation and produce the 
       parameters for the next generation
       @param: model: 
@@ -264,8 +265,8 @@ def run_one_sim(param):
     plt.legend()
     # Display a figure.
     if N_CHEATER > 0:
-      plt.savefig(f"./figures/2d_{N_CHEATER}_adversary_average.jpg")
-    else: plt.savefig(f"./figures/2dnoadversary_average.jpg")
+      plt.savefig(f"./figures/{MODEL}_{N_CHEATER}_adversary_{param[0]}_average.jpg")
+    else: plt.savefig(f"./figures/{MODEL}_noadversary_average_{param[0]}.jpg")
   score = r[n_keep-1, 0]
   return score
 
@@ -292,6 +293,6 @@ if __name__ == '__main__':
   plt.plot(all_scores)
   plt.ylabel("best proportion of correct agents in each generation")
   plt.ylim(0,1)
-  plt.savefig(f"./figures/{N_GEN}gen_{N_CHEATER}adv.jpg")
+  plt.savefig(f"./figures/{MODEL}_{N_CHEATER}_adv_over_{N_GEN}generations.jpg")
   toc = time.perf_counter()
   print(f"Duration: {toc - tic:0.4f} seconds")
