@@ -255,9 +255,11 @@ def run_one_sim(param):
   p = np.divide(p, N_TRIALS)
   r = np.divide(r, N_TRIALS)
   w = np.divide(w, N_TRIALS)
-  score = r[n_keep-1, 0]
+  
+  score = np.mean(r[n_keep-100, 0])
+  print(score)
 
-  if PLOT and score > 0.3:
+  if PLOT and score > 0.2:
     plt.plot(f, label = 'no idea')
     plt.plot( p, label = 'polling')
     plt.plot( r, label = 'correct site')
@@ -278,7 +280,7 @@ if __name__ == '__main__':
   rand = [np.random.uniform(0, 0.05) for _ in range(GRAPH_SIZE)]
   params = [(1-r, r) for r in rand]
   params = np.array(params,dtype="f,f")
-  print("param:", params)
+  # print("param:", params)
   # add some noise
   for gen in range(N_GEN):
     scores = np.zeros((GRAPH_SIZE, ))
@@ -287,7 +289,7 @@ if __name__ == '__main__':
       score = run_one_sim(param)
       scores[i] = score
     '''maybe print the avg score of each generation'''
-    print(np.mean(scores))
+    print(f'gen_{gen} score', np.mean(scores))
     all_scores[gen] = np.mean(scores)
     params = next_gen(params, scores)
   plt.clf()
