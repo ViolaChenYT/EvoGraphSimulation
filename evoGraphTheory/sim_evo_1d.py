@@ -271,7 +271,8 @@ def run_one_sim(param):
     if N_CHEATER > 0:
       plt.savefig(f"./figures/{MODEL}_{N_CHEATER}_adversary_{param[0]}_average.jpg")
     else: plt.savefig(f"./figures/{MODEL}_noadversary_average_{param[0]}.jpg")
-    return score
+    
+  return score
 
 if __name__ == '__main__':
   tic = time.perf_counter()
@@ -280,7 +281,6 @@ if __name__ == '__main__':
   rand = [np.random.uniform(0, 0.05) for _ in range(GRAPH_SIZE)]
   params = [(1-r, r) for r in rand]
   params = np.array(params,dtype="f,f")
-  # print("param:", params)
   # add some noise
   for gen in range(N_GEN):
     scores = np.zeros((GRAPH_SIZE, ))

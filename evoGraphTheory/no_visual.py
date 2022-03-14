@@ -202,7 +202,7 @@ class MyGame():
         best_site = i
       self.sites.append(site)
     self.best = best_site + 1
-    print(".")
+    print(".", end="",flush=True)
 
   # things done at each iteration
   def timerFired(self):
