@@ -36,7 +36,7 @@ like it is really supposed to converge etc intuitively, but many times it is not
 - ring / star graph
 - when mutation happen, think about whether to mutate parent or child
 '''
-import random, math, pygame,time
+import pygame,time, sys
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -56,7 +56,7 @@ MUTATION_RATE = 0.1
 WELLMIXED = 0
 RING = 1
 STAR = 2
-MODEL = STAR
+MODEL = 0 # default wellmixed
 
 # generate simple graphs
 ringgraph = [[(i-1)%GRAPH_SIZE, (i+1)%GRAPH_SIZE] for i in range(GRAPH_SIZE)]
@@ -275,6 +275,7 @@ def run_one_sim(param):
   return score
 
 if __name__ == '__main__':
+  MODEL = sys.argv[1]
   tic = time.perf_counter()
   '''initialize n = graph_size sets of parameters'''
   all_scores = np.zeros((N_GEN,1))
