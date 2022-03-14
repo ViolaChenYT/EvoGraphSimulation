@@ -51,7 +51,7 @@ n_keep = N_ITER # no. of frames to record
 
 # Evolution parameters
 GRAPH_SIZE = 10
-N_GEN = 100 # for evolution
+N_GEN = 10 # for evolution
 MUTATION_RATE = 0.1
 WELLMIXED = 0
 RING = 1
