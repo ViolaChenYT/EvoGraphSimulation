@@ -46,7 +46,7 @@ from no_visual import*
 VISUAL = False
 PLOT = True
 '''PARAMETERS'''
-N_TRIALS = 15 # per run
+N_TRIALS = 5 # per run
 n_keep = N_ITER # no. of frames to record
 
 # Evolution parameters
@@ -60,7 +60,7 @@ MODEL = STAR
 
 # generate simple graphs
 ringgraph = [[(i-1)%GRAPH_SIZE, (i+1)%GRAPH_SIZE] for i in range(GRAPH_SIZE)]
-stargraph = [[i for i in range(1,GRAPH_SIZE)]] + [0 for _ in range(GRAPH_SIZE-1)]
+stargraph = [[i for i in range(1,GRAPH_SIZE)]] + [[0] for _ in range(GRAPH_SIZE-1)]
 
 MAPSIZE = 400
 NSITE = 2
