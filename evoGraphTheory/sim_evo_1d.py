@@ -292,6 +292,6 @@ if __name__ == '__main__':
   plt.plot(all_scores)
   plt.ylabel("best proportion of correct agents in each generation")
   plt.ylim(0,1)
-  plt.savefig(f"./figures/{N_GEN}gen_{N_CHEATER}adv.jpg")
+  plt.savefig(f"./{N_GEN}gen_{N_CHEATER}adv.jpg")
   toc = time.perf_counter()
   print(f"Duration: {toc - tic:0.4f} seconds")
