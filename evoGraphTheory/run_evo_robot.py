@@ -1,13 +1,20 @@
 '''
 @author: Viola Chen
 
+@TODO: 3/16
 
-@TODO: 2/21
-randomness seems to really play a part here, any way to get over that?
-like it is really supposed to converge etc intuitively, but many times it is not
-- try different cases of initial condition
-- squares? 
-- more adversary?
+@TODO: 2/28
+* ask for cluster access
+* increase params
+  - graph_size: 5 -> 10
+  - repeats: 7 -> 10? 20?
+  - n_gen: 5 -> 50? 100?
+- confidence interval for the plots
+- plot some sort of fitness landscape (fitness against param)
+- use jupyter notebook 0. 0
+- make sure u don't select yourself in birthdeat
+* ring / star graph
+* when mutation happen, think about whether to mutate parent or child
 
 @isses: 2/25
 - slower convergence
@@ -20,21 +27,15 @@ like it is really supposed to converge etc intuitively, but many times it is not
 - resource utilization?
 
 @TODO: 2/25
-- every time there is a mutation, re-run simulation
-- have to normalize everyhting
+? every time there is a mutation, re-run simulation
+* have to normalize everyhting
 
-@TODO: 2/28
-- ask for cluster access
-- increase params
-  - graph_size: 5 -> 10
-  - repeats: 7 -> 10? 20?
-  - n_gen: 5 -> 50? 100?
-- confidence interval for the plots
-- plot some sort of fitness landscape (fitness against param)
-- use jupyter notebook 0. 0
-- make sure u don't select yourself in birthdeat
-- ring / star graph
-- when mutation happen, think about whether to mutate parent or child
+@TODO: 2/21
+randomness seems to really play a part here, any way to get over that?
+like it is really supposed to converge etc intuitively, but many times it is not
+- try different cases of initial condition
+- squares? 
+- more adversary?
 '''
 import pygame,time, sys
 import numpy as np
@@ -256,8 +257,7 @@ def run_one_sim(param):
   r = np.divide(r, N_TRIALS)
   w = np.divide(w, N_TRIALS)
   
-  score = np.mean(r[n_keep-50, 0])
-  print(score)
+  score = np.mean(r[-100: ,0])
 
   if PLOT and score > 0.2:
     plt.clf()
