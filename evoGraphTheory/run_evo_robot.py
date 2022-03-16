@@ -48,7 +48,7 @@ VISUAL = False
 PLOT = True
 '''PARAMETERS'''
 N_TRIALS = 15 # per run
-n_keep = 100 # no. of frames to record
+n_keep = N_ITER # no. of frames to record
 
 # Evolution parameters
 GRAPH_SIZE = 10
@@ -257,7 +257,7 @@ def run_one_sim(param):
   r = np.divide(r, N_TRIALS)
   w = np.divide(w, N_TRIALS)
   
-  score = np.mean(r[n_keep-50, 0])
+  score = np.mean(r[-100:, 0])
   print(score)
 
   if PLOT and score > 0.2:
