@@ -256,10 +256,11 @@ def run_one_sim(param):
   r = np.divide(r, N_TRIALS)
   w = np.divide(w, N_TRIALS)
   
-  score = np.mean(r[n_keep-100, 0])
+  score = np.mean(r[n_keep-50, 0])
   print(score)
 
   if PLOT and score > 0.2:
+    plt.clf()
     plt.plot(f, label = 'no idea')
     plt.plot( p, label = 'polling')
     plt.plot( r, label = 'correct site')
