@@ -86,10 +86,12 @@ def run_one_sim(param):
 if __name__ == '__main__':
   tic = time.perf_counter()
   '''initialize n = graph_size sets of parameters'''
-  n = 101
+  n = 201
   all_scores = np.zeros((n,1))
-  rand = [0.01 * i for i in range(n)]
-  params = [(r, 1-r) for r in rand]
+  rand = [0.01 * i - 1 for i in range(n)] # so it's  in [-1, 1]
+  def f(r):
+    return -r / 2 + 0.5
+  params = [(r, f(r)) for r in rand]
   params = np.array(params,dtype="f,f")
   # add some noise
   for i in range(n):
