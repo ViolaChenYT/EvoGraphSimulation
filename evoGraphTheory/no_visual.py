@@ -39,8 +39,8 @@ class Agent():
   def __init__(self, id, server, param = (1,0), faulty = False):
     '''initialize agent'''
     self.id = id
-    self.x = (np.random.normal(0, MAPSIZE/2))%MAPSIZE
-    self.y = (np.random.normal(0, MAPSIZE/2))%MAPSIZE# random.random() * MAPSIZE
+    self.x = (np.random.normal(MAPSIZE/2, MAPSIZE/2))%MAPSIZE
+    self.y = (np.random.normal(MAPSIZE/2, MAPSIZE/2))%MAPSIZE# random.random() * MAPSIZE
     self.r = AGENT_RADIUS
     self.state = NOIDEA
     self.speculation = (-1, -1) # for cross inhib model

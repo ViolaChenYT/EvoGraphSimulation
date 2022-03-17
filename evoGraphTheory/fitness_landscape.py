@@ -66,7 +66,7 @@ def run_one_sim(param):
   r = np.divide(r, N_TRIALS)
   w = np.divide(w, N_TRIALS)
   score = np.mean(r)
-
+  print(param, score)
   '''if PLOT and score > 0.2:
     plt.clf()
     plt.plot(f, label = 'no idea')
