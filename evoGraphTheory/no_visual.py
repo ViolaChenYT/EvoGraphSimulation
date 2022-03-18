@@ -1,4 +1,4 @@
-import random, math, pygame
+import random, math
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -75,7 +75,7 @@ class Agent():
       stepsize = np.random.normal(AGENT_STEPSIZE / 2, AGENT_STEPSIZE)
       tmp = np.random.standard_normal()
       xdiff, ydiff = self.speculation[0] - self.x, self.speculation[1] - self.y
-      theta = math.atan2(ydiff, xdiff) + tmp
+      theta = math.atan2(ydiff, xdiff) + tmp/2
       dx = stepsize * math.cos(theta)
       dy = stepsize * math.sin(theta)
       
@@ -107,27 +107,28 @@ class Agent():
     message = random.choice(friendlist)
     quality = self.c1 * message.broadcasting[1] + self.c2
     '''estimate of the true quality of the site heard'''
-    total_qual = self.quality + quality
+    # total_qual = self.quality + quality
 
     # if robot in commited state, 
     # it retains its state with probability of the quality it sampled
     rand_n = random.random()
     if self.state == COMMITTED and self.site != message.site:
-      if rand_n >= self.quality / total_qual:
-        # print(rand_n)
+      if quality > self.quality and rand_n < 0.1:
         self.state = NOIDEA
         self.site = 0
     elif self.state == COMMITTED:
       return  
     else: # else enter polling state 
       if self.state == POLLING:
-        if rand_n >= self.quality / total_qual:
+        if quality > self.quality:
           self.speculation = message.broadcasting[0]
           self.quality = quality
       else: # should be noidea here
         self.state = POLLING
         self.speculation = message.broadcasting[0]
         self.quality = quality
+        
+        
   def sample(self):
     '''at every iteration, if an agent is in range of a target, 
     it will sample the site quality with some random noise'''
@@ -136,16 +137,16 @@ class Agent():
         if self.state == COMMITTED:
           if not inrange(self.opinion, site.loc, SITE_RAD):
             # if it's not my site
-            quality = max(np.random.normal(0,0.1) + site.quality, 0.99999)
-            if quality > self.quality or random.random() > 0.99:
+            quality = max(np.random.normal(0,0.1) + site.quality, 1)
+            if quality > self.quality or random.random() > 0.999999:
               self.opinion = (self.x, self.y)
               self.site = site.id
               self.quality = quality
-        elif random.random() < site.quality:
+        else: #elif random.random() < site.quality:
           self.state = COMMITTED
           self.opinion = (self.x, self.y)
           self.site = site.id
-          self.quality = max(np.random.normal(0,0.1) + site.quality, 0.99999)
+          self.quality = max(np.random.normal(0,0.1) + site.quality, 1)
           return
 
 class Target():
@@ -177,7 +178,6 @@ class MyGame():
     self.params = params
     self.initRobots()
     self.initSites()
-    pygame.init()
 
   # initialize robots, assign each a unique ID
   def initRobots(self):

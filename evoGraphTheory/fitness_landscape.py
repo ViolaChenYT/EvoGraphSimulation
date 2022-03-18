@@ -16,7 +16,7 @@ from no_visual import*
 VISUAL = False
 PLOT = True
 '''PARAMETERS'''
-N_TRIALS = 50 # per run
+N_TRIALS = 15 # per run
 n_keep = 50 # no. of frames to record
 
 # Evolution parameters
