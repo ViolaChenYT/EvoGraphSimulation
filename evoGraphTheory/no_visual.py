@@ -111,14 +111,14 @@ class Agent():
 
     # if robot in commited state, 
     # it retains its state with probability of the quality it sampled
-    rand_n = random.random()
+    rand_n = np.random.uniform()
     if self.state == COMMITTED and self.site != message.site:
-      if quality > self.quality and rand_n < 0.1:
+      if quality > self.quality and rand_n > self.quality:
         self.state = NOIDEA
         self.site = 0
     elif self.state == COMMITTED:
       return  
-    else: # else enter polling state 
+    else: 
       if self.state == POLLING:
         if quality > self.quality:
           self.speculation = message.broadcasting[0]
@@ -137,16 +137,16 @@ class Agent():
         if self.state == COMMITTED:
           if not inrange(self.opinion, site.loc, SITE_RAD):
             # if it's not my site
-            quality = max(np.random.normal(0,0.1) + site.quality, 1)
+            quality = site.quality #max(np.random.normal(0,0.05) + site.quality, 1)
             if quality > self.quality or random.random() > 0.999999:
               self.opinion = (self.x, self.y)
               self.site = site.id
               self.quality = quality
-        else: #elif random.random() < site.quality:
+        else:
           self.state = COMMITTED
           self.opinion = (self.x, self.y)
           self.site = site.id
-          self.quality = max(np.random.normal(0,0.1) + site.quality, 1)
+          self.quality = site.quality #max(np.random.normal(0,0.05) + site.quality, 1)
           return
 
 class Target():
@@ -159,8 +159,8 @@ class Target():
     # self.loc = (int(np.random.normal(MAPSIZE/2, MAPSIZE/2)) % MAPSIZE, \
     #            int(np.random.normal(MAPSIZE/2, MAPSIZE/2)) % MAPSIZE)
     self.id = id + 1
-    if self.id == 1: self.quality = 0.8
-    else: self.quality = 0.2 # random.random()
+    if self.id == 1: self.quality = 0.9
+    else: self.quality = 0.1
 
 class MyGame():
   def __init__(self, params, free, polling, right, wrong, width = 600, height = 600, fps = 60, title = "simulation"):

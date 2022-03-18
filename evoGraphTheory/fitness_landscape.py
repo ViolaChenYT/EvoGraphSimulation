@@ -16,7 +16,7 @@ from no_visual import*
 VISUAL = False
 PLOT = True
 '''PARAMETERS'''
-N_TRIALS = 15 # per run
+N_TRIALS = 5 # per run
 n_keep = 50 # no. of frames to record
 
 # Evolution parameters
@@ -87,9 +87,9 @@ if __name__ == '__main__':
   idx = sys.argv[1]
   tic = time.perf_counter()
   '''initialize n = graph_size sets of parameters'''
-  n = 201
+  n = 101
   all_scores = np.zeros((n,1))
-  rand = [0.01 * i - 1 for i in range(n)] # so it's  in [-1, 1]
+  rand = [0.02 * i - 1 for i in range(n)] # so it's  in [-1, 1]
   def f(r):
     return -r / 2 + 0.5
   params = [(r, f(r)) for r in rand]
