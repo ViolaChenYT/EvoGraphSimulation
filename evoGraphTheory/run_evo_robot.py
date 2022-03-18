@@ -77,6 +77,10 @@ DARKBLUE = pygame.Color('#00008B')
 SITE_PALETTE = [RED, DARKBLUE]
 BOT_PALETTE = [PINK, BLUE]
 
+def f(x):#fitness fn, x: coefficient, returns appropriate fn so it's still in [0,1]
+	return -x/2 + 0.5
+
+
 class PygameGame(object):
   def __init__(self, params, free, polling, right, wrong, width = 600, height = 600, fps = 60, title = "simulation"):
     self.width = width
@@ -213,7 +217,7 @@ def next_gen(population, scores, model = MODEL):
       if np.random.uniform(0,1) < MUTATION_RATE:
         (c1,c2) = population[tobirth]
         c1 = c1 + np.random.normal(-0.1, 0.1)
-        c2 = 1 - c1
+        c2 = f(c1)
         population[togo] = (c1,c2)
       else:
         population[togo] = population[tobirth]
@@ -225,7 +229,7 @@ def next_gen(population, scores, model = MODEL):
       if np.random.uniform(0,1) < MUTATION_RATE:
         (c1,c2) = population[tobirth]
         c1 = c1 + np.random.normal(-0.1, 0.1)
-        c2 = 1 - c1
+        c2 = f(c1)
         population[tobirth] = (c1,c2)
   elif model == RING:
     for _ in range(GRAPH_SIZE):
@@ -235,7 +239,7 @@ def next_gen(population, scores, model = MODEL):
       if np.random.uniform(0,1) < MUTATION_RATE:
         (c1,c2) = population[tobirth]
         c1 = c1 + np.random.normal(-0.1, 0.1)
-        c2 = 1 - c1
+        c2 = f(c1)
         population[tobirth] = (c1,c2)
   else: 
     print("PANIC! No evolution model selected")
@@ -280,8 +284,8 @@ if __name__ == '__main__':
   tic = time.perf_counter()
   '''initialize n = graph_size sets of parameters'''
   all_scores = np.zeros((N_GEN,1))
-  rand = [np.random.uniform(0, 0.05) for _ in range(GRAPH_SIZE)]
-  params = [(1-r, r) for r in rand]
+  rand = [1-np.random.uniform(0, 0.05) for _ in range(GRAPH_SIZE)]
+  params = [(r, f(r)) for r in rand]
   params = np.array(params,dtype="f,f")
   # add some noise
   for gen in range(N_GEN):

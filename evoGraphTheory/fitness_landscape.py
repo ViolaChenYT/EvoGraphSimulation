@@ -16,8 +16,8 @@ from no_visual import*
 VISUAL = False
 PLOT = True
 '''PARAMETERS'''
-N_TRIALS = 30 # per run
-n_keep = 100 # no. of frames to record
+N_TRIALS = 50 # per run
+n_keep = 50 # no. of frames to record
 
 # Evolution parameters
 GRAPH_SIZE = 10
@@ -84,6 +84,7 @@ def run_one_sim(param):
   return score
 
 if __name__ == '__main__':
+  idx = sys.argv[1]
   tic = time.perf_counter()
   '''initialize n = graph_size sets of parameters'''
   n = 201
@@ -103,7 +104,7 @@ if __name__ == '__main__':
   plt.ylabel("best proportion of correct agents in each generation")
   plt.ylim(0,1)
   plt.xlabel("parameter for quality perception, take it as c q_received + (1-c)")
-  plt.xlim(0,1)
-  plt.savefig(f"landscape.jpg")
+  plt.xlim(-1,1)
+  plt.savefig(f"{idx}landscape.jpg")
   toc = time.perf_counter()
   print(f"Duration: {toc - tic:0.4f} seconds")
