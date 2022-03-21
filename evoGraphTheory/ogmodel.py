@@ -1,17 +1,13 @@
-import random, math, string
+import random, math,time
 import numpy as np
-import networkx as nx
 import matplotlib.pyplot as plt
 from networkx.drawing.nx_pydot import *
+from network import *
+from run_evo_robot import MUTATION_RATE
 
-import random, math
-import numpy as np
-import networkx as nx
-import matplotlib.pyplot as plt
-from networkx.drawing.nx_pydot import *
-
-N_CHEATER = 5
-N_ITER = 6000 # per trial
+N_ITER = 2000 # per trial
+n_keep=N_ITER
+MUTATION_RATE = 0.01
 
 MAPSIZE = 400
 # agent states
@@ -27,6 +23,9 @@ COMM_RANGE = 80
 NSITE = 2
 SITE_RAD = 60
 
+WELLMIXED = 0
+RING = 1
+STAR = 2
 
 class Channel():
     def __init__(self, sd): # sd = standard deviation: int / float
@@ -67,7 +66,7 @@ class Agent():
     self.speculation = (-1, -1) # for cross inhib model
     self.opinion = (-1, -1) # should be location of commited site
     self.site = 0 # id of the committed site?
-    self.quality = -1 # have not seen any
+    self.quality = 0 # have not seen any
     self.broadcasting = None
     self.server = server
     self.channel = S1
@@ -106,11 +105,7 @@ class Agent():
   
   def advertise(self):
     '''committed cells broadcast their opinion with probability of the quality sampled'''
-    if self.faulty:
-      quality = 1 - self.quality
-    else:
-      quality = self.quality
-    if self.state == COMMITTED and random.random() < self.quality:
+    if self.state == COMMITTED and np.random.uniform() < self.quality:
         self.broadcasting = self.channel.send(self.opinion)
     else: self.broadcasting = None
 
@@ -127,7 +122,6 @@ class Agent():
     if len(friendlist) == 0: 
       return
     message = random.choice(friendlist)
-    quality = self.c1 * message.broadcasting[1] + self.c2
     '''estimate of the true quality of the site heard'''
     # total_qual = self.quality + quality
 
@@ -135,20 +129,20 @@ class Agent():
     # it retains its state with probability of the quality it sampled
     rand_n = np.random.uniform()
     if self.state == COMMITTED and self.site != message.site:
-      if quality > self.quality and rand_n > self.quality:
+      if rand_n > self.quality:
         self.state = NOIDEA
         self.site = 0
+        self.quality = 0
     elif self.state == COMMITTED:
       return  
     else: 
       if self.state == POLLING:
-        if quality > self.quality:
-          self.speculation = message.broadcasting[0]
-          self.quality = quality
+        if rand_n > 0.5:
+          self.speculation = message.broadcasting
       else: # should be noidea here
         self.state = POLLING
-        self.speculation = message.broadcasting[0]
-        self.quality = quality
+        self.speculation = message.broadcasting
+        self.quality = 0
         
         
   def sample(self):
@@ -159,16 +153,18 @@ class Agent():
         if self.state == COMMITTED:
           if not inrange(self.opinion, site.loc, SITE_RAD):
             # if it's not my site
-            quality = site.quality #max(np.random.normal(0,0.05) + site.quality, 1)
-            if quality > self.quality or random.random() > 0.999999:
+            quality = max(np.random.normal(0,0.1) + site.quality, 1)
+            if quality > self.quality:
               self.opinion = (self.x, self.y)
               self.site = site.id
               self.quality = quality
+          else:
+              self.quality = max(np.random.normal(0,0.1) + site.quality, 1)
         else:
           self.state = COMMITTED
           self.opinion = (self.x, self.y)
           self.site = site.id
-          self.quality = site.quality #max(np.random.normal(0,0.05) + site.quality, 1)
+          self.quality = max(np.random.normal(0,0.1) + site.quality, 1)
           return
 
 class Target():
@@ -182,10 +178,10 @@ class Target():
     #            int(np.random.normal(MAPSIZE/2, MAPSIZE/2)) % MAPSIZE)
     self.id = id + 1
     if self.id == 1: self.quality = 0.9
-    else: self.quality = 0.1
+    else: self.quality = 0.2
 
 class MyGame():
-  def __init__(self, params, free, polling, right, wrong, width = 600, height = 600, fps = 60, title = "simulation"):
+  def __init__(self, model, free, polling, right, wrong, graph, width = 600, height = 600, fps = 60, title = "simulation"):
     self.width = width
     self.height = height
     self.fps = fps
@@ -197,17 +193,16 @@ class MyGame():
     self.polling = polling
     self.right = right
     self.wrong = wrong
-    self.params = params
+    self.model = model
+    self.graph = graph
     self.initRobots()
     self.initSites()
+    self.mutant = 0
 
   # initialize robots, assign each a unique ID
   def initRobots(self):
     for i in range(NROBOT):
-      if i < N_CHEATER:
-        robot = Agent(i, self, param = (self.params[i]),faulty = True)
-      else:
-        robot = Agent(i, self, param = (self.params[i]))
+      robot = Agent(i, self)
       self.robots.append(robot)
 
   # right now assign the site with a deterministic quality
@@ -224,13 +219,47 @@ class MyGame():
         best_site = i
       self.sites.append(site)
     self.best = best_site + 1
-    print(".", end="",flush=True)
+    
+  def next_gen(self, scores):
+    ''' take parameters and scores from the previous generation and produce the 
+        parameters for the next generation
+        @param: model: 
+    '''
+    model = self.model
+    prob = softmax(scores)
+    # print(scores, prob)
+    indices = [i for i in range(GRAPH_SIZE)]
+    if model == WELLMIXED:
+        for _ in range(GRAPH_SIZE):
+            tobirth = np.random.choice(indices, p=prob)
+            togo = np.random.randint(0, GRAPH_SIZE)
+            self.robots[togo].channel = self.robots[tobirth].channel
+            if np.random.uniform() < MUTATION_RATE:
+                self.robots[togo].channel = S2
+    elif model == STAR:
+        for _ in range(GRAPH_SIZE):
+            tobirth = np.random.choice(indices, p=prob)
+            togo = np.random.choice(stargraph[tobirth])
+            self.robots[togo].channel = self.robots[tobirth].channel
+            if np.random.uniform(0,1) < MUTATION_RATE:
+                self.robots[togo].channel = S2
+    elif model == RING:
+        for _ in range(GRAPH_SIZE):
+            tobirth = np.random.choice(indices, p=prob)
+            togo = np.random.choice(ringgraph[tobirth])
+            self.robots[togo].channel = self.robots[tobirth].channel
+            if np.random.uniform(0,1) < MUTATION_RATE:
+                self.robots[togo].channel = S2
+    else: 
+        print("PANIC! No evolution model selected")
+        raise Exception
 
   # things done at each iteration
   def timerFired(self):
     '''each robot first sample, if they are committed, then they advertise, 
      and all robots check what they have received
      '''
+    cnt = 0
     for robot in self.robots:
       robot.sample()
       robot.advertise()
@@ -240,6 +269,8 @@ class MyGame():
       robot.move()
     n_poll, n_commit, n_correct = 0,0,0
     for robot in self.robots:
+      if robot.channel == S2:
+        cnt +=1
       if robot.state == 1:
         n_poll += 1
       if robot.state == 2:
@@ -256,10 +287,62 @@ class MyGame():
     self.right.append(fright)
     self.wrong.append(fwrong)
     self.free.append(ff)
-
+    # add some mutation and evolution code here
+    qual = [bot.quality for bot in self.robots]
+    self.next_gen(qual)
+    if self.mutant < 1:
+        self.mutant = cnt / NROBOT
+        if self.mutant >= 1:
+            print(self.cnt)
+        print(self.mutant)
+    
+    
   def run(self):
-    cnt = 0
-    while cnt < N_ITER:
-      cnt += 1
+    self.cnt = 0
+    while self.cnt < N_ITER:
+      self.cnt += 1
       # invoke everything that are supposed to happen in one time step
       self.timerFired() 
+
+def softmax(scores,temp=5.0):
+    ''' transforms scores to probabilites '''
+    '''exp = np.exp(np.array(scores)/temp)
+    return exp/exp.sum()'''
+    if sum(scores) == 0:
+        return [1 / len(scores) for _ in range(len(scores))]
+    else:
+        return np.array(scores) / sum(scores)
+
+if __name__ == '__main__':
+    model = sys.argv[1]
+    if model == "star":
+        G = stargraph
+        model = STAR
+    elif model == "ring":
+        G = (ringgraph)
+        model = RING
+    else:
+        G = (wellmixed)
+        model = WELLMIXED
+    frac_free = []
+    frac_polling = []
+    frac_correct = []
+    frac_wrong = []
+    params = [0 for _ in range(NROBOT)]
+    game = MyGame(model, frac_free, frac_polling, frac_correct, frac_wrong, G)
+    game.run()
+    
+    corrects = np.array(frac_correct[-n_keep:]).reshape((n_keep,1))
+    pollings = np.array(frac_polling[-n_keep:]).reshape((n_keep,1))
+    wrongs = np.array(frac_wrong[-n_keep:]).reshape((n_keep,1))
+    frees = np.array(frac_free[-n_keep:]).reshape((n_keep,1))
+    
+    plt.clf()
+    plt.plot(frees, label = 'no idea')
+    plt.plot( pollings, label = 'polling')
+    plt.plot( corrects, label = 'correct site')
+    plt.plot(wrongs, label = 'incorrect site')
+    plt.ylabel("proportion of agents in each state")
+    plt.ylim(0,1)
+    plt.legend()
+    plt.show()

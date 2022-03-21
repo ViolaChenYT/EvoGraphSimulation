@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from networkx.drawing.nx_pydot import *
 
 
-GRAPH_SIZE = 10
+GRAPH_SIZE = 15
 
 ringgraph = [[(i-1)%GRAPH_SIZE, (i+1)%GRAPH_SIZE] for i in range(GRAPH_SIZE)]
 stargraph = [[i for i in range(1,GRAPH_SIZE)]] + [[0] for _ in range(GRAPH_SIZE-1)]
@@ -37,19 +37,20 @@ def visualize(G, name = ""):
         plt.savefig(name)
     else:
         plt.show()
-        
-model = sys.argv[1]
-SAVE = True
-if model == "star":
-    G = newgraph(stargraph)
-elif model == "ring":
-    G = newgraph(ringgraph)
-else:
-    G = newgraph(wellmixed)
-if SAVE:
-    visualize(G, name=f"{model}graphvisual.jpg")
-else:
-    visualize(G)
+
+if __name__ == '__main__':
+    model = sys.argv[1]
+    SAVE = True
+    if model == "star":
+        G = newgraph(stargraph)
+    elif model == "ring":
+        G = newgraph(ringgraph)
+    else:
+        G = newgraph(wellmixed)
+    if SAVE:
+        visualize(G, name=f"{model}graphvisual.jpg")
+    else:
+        visualize(G)
 
 
 

@@ -235,7 +235,7 @@ def next_gen(population, scores, model = MODEL):
       population[togo] = population[tobirth]
       if np.random.uniform(0,1) < MUTATION_RATE:
         (c1,c2) = population[tobirth]
-        c1 = c1 + np.random.normal(-0.1, 0.1)
+        c1 = c1 + np.random.normal(-0.2, 0.1)
         c2 = f(c1)
         population[tobirth] = (c1,c2)
   elif model == RING:
@@ -245,7 +245,7 @@ def next_gen(population, scores, model = MODEL):
       population[togo] = population[tobirth]
       if np.random.uniform(0,1) < MUTATION_RATE:
         (c1,c2) = population[tobirth]
-        c1 = c1 + np.random.normal(-0.1, 0.1)
+        c1 = c1 + np.random.normal(-0.2, 0.1)
         c2 = f(c1)
         population[tobirth] = (c1,c2)
   else: 
