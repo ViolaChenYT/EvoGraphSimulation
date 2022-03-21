@@ -1,3 +1,9 @@
+import random, math, string
+import numpy as np
+import networkx as nx
+import matplotlib.pyplot as plt
+from networkx.drawing.nx_pydot import *
+
 import random, math
 import numpy as np
 import networkx as nx
@@ -21,6 +27,26 @@ COMM_RANGE = 80
 NSITE = 2
 SITE_RAD = 60
 
+
+class Channel():
+    def __init__(self, sd): # sd = standard deviation: int / float
+        if not (isinstance(sd, int) or isinstance(sd, float)):
+            raise "standard deviation should be numerical"
+        self.sd = sd
+    
+    def __eq__(self,other):
+        return self.sd == other.sd
+    
+    def send(self, val):
+        (x,y) = val
+        x_noise = np.random.normal(0, self.sd)
+        y_noise = np.random.normal(0, self.sd)
+        return (x+x_noise, y+y_noise)
+    
+# comm channels
+S1 = Channel(SITE_RAD * 2)
+S2 = Channel(SITE_RAD / 2)
+
 def inrange(a,b,r):
   '''check if 2 centers of circle (a,b) are in range r, inrage -> True
   @params a, b: tuples, coordinate on a plane;
@@ -31,7 +57,7 @@ def inrange(a,b,r):
   return (x1 - x2)**2 + (y1 - y2)**2 <= r**2
 
 class Agent():
-  def __init__(self, id, server, param = (1,0), faulty = False):
+  def __init__(self, id, server, param = (1,0)):
     '''initialize agent'''
     self.id = id
     self.x = (np.random.normal(MAPSIZE/2, MAPSIZE/2))%MAPSIZE
@@ -44,11 +70,12 @@ class Agent():
     self.quality = -1 # have not seen any
     self.broadcasting = None
     self.server = server
-    self.faulty = faulty
+    self.channel = S1
+    '''
     (c1,c2) = param
     self.c1 = c1
     self.c2 = c2
-
+    '''
   def __eq__(self, other):
     return self.id == other.id
 
@@ -84,7 +111,7 @@ class Agent():
     else:
       quality = self.quality
     if self.state == COMMITTED and random.random() < self.quality:
-        self.broadcasting = (self.opinion, quality)
+        self.broadcasting = self.channel.send(self.opinion)
     else: self.broadcasting = None
 
   

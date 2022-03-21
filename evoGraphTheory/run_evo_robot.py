@@ -77,6 +77,13 @@ DARKBLUE = pygame.Color('#00008B')
 SITE_PALETTE = [RED, DARKBLUE]
 BOT_PALETTE = [PINK, BLUE]
 
+
+def softmax(scores,temp=5.0):
+    ''' transforms scores to probabilites '''
+    exp = np.exp(np.array(scores)/temp)
+    return exp/exp.sum()
+  
+
 def f(x):#fitness fn, x: coefficient, returns appropriate fn so it's still in [0,1]
 	return -x/2 + 0.5
 
