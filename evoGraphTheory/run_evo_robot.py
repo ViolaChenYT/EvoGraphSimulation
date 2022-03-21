@@ -77,6 +77,13 @@ DARKBLUE = pygame.Color('#00008B')
 SITE_PALETTE = [RED, DARKBLUE]
 BOT_PALETTE = [PINK, BLUE]
 
+
+def softmax(scores,temp=5.0):
+    ''' transforms scores to probabilites '''
+    exp = np.exp(np.array(scores)/temp)
+    return exp/exp.sum()
+  
+
 def f(x):#fitness fn, x: coefficient, returns appropriate fn so it's still in [0,1]
 	return -x/2 + 0.5
 
@@ -228,7 +235,7 @@ def next_gen(population, scores, model = MODEL):
       population[togo] = population[tobirth]
       if np.random.uniform(0,1) < MUTATION_RATE:
         (c1,c2) = population[tobirth]
-        c1 = c1 + np.random.normal(-0.1, 0.1)
+        c1 = c1 + np.random.normal(-0.2, 0.1)
         c2 = f(c1)
         population[tobirth] = (c1,c2)
   elif model == RING:
@@ -238,7 +245,7 @@ def next_gen(population, scores, model = MODEL):
       population[togo] = population[tobirth]
       if np.random.uniform(0,1) < MUTATION_RATE:
         (c1,c2) = population[tobirth]
-        c1 = c1 + np.random.normal(-0.1, 0.1)
+        c1 = c1 + np.random.normal(-0.2, 0.1)
         c2 = f(c1)
         population[tobirth] = (c1,c2)
   else: 
