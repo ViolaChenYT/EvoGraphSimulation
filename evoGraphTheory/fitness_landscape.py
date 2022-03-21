@@ -87,9 +87,10 @@ if __name__ == '__main__':
   idx = sys.argv[1]
   tic = time.perf_counter()
   '''initialize n = graph_size sets of parameters'''
-  n = 101
+  inc = 0.1
+  n = int(2 / inc) + 1
   all_scores = np.zeros((n,1))
-  rand = [0.02 * i - 1 for i in range(n)] # so it's  in [-1, 1]
+  rand = [inc * i - 1 for i in range(n)] # so it's  in [-1, 1]
   def f(r):
     return -r / 2 + 0.5
   params = [(r, f(r)) for r in rand]
