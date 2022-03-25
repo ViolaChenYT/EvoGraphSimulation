@@ -430,4 +430,3 @@ if __name__ == '__main__':
       game.run_evo()
     else: game.run_trials()
     
->>>>>>> 8836cee3e54529465813b567ec4b638f125b5c65
