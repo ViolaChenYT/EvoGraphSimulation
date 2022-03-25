@@ -12,7 +12,7 @@ N_ITER = 3000 # per trial
 n_keep = N_ITER
 MUTATION_RATE = 0.05
 
-N_TRIALS = 50
+N_TRIALS = 100
 
 MAPSIZE = 400
 # agent states
@@ -419,6 +419,7 @@ if __name__ == '__main__':
     else:
         G = (wellmixed)
         model = WELLMIXED
+    print(d[model])
     params = [0 for _ in range(NROBOT)]
     game = MyGame(model, G)
     game.run_evo()
