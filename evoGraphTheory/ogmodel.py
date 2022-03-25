@@ -8,11 +8,11 @@ from network import *
 landscape for S1 S2 R1 R2
 evo allowing both mutations
 '''
-N_ITER = 6000 # per trial
+N_ITER = 5000 # per trial
 n_keep = N_ITER
 MUTATION_RATE = 0.02
 
-N_TRIALS = 50
+N_TRIALS = 20
 
 MAPSIZE = 400
 # agent states
@@ -75,8 +75,8 @@ class Agent():
     self.quality = 0 # have not seen any
     self.broadcasting = None
     self.server = server
-    self.schannel = S2 #s1r1 s1r2 s2r1 s2r2
-    self.rchannel = S2
+    self.schannel = S1 #s1r1 s1r2 s2r1 s2r2
+    self.rchannel = S1
   def __eq__(self, other):
     return self.id == other.id
 
