@@ -21,11 +21,6 @@ COMM_RANGE = 80
 NSITE = 2
 SITE_RAD = 60
 
-def softmax(scores,temp=5.0):
-    ''' transforms scores to probabilites '''
-    exp = np.exp(np.array(scores)/temp)
-    return exp/exp.sum()
-  
 def inrange(a,b,r):
   '''check if 2 centers of circle (a,b) are in range r, inrage -> True
   @params a, b: tuples, coordinate on a plane;
@@ -113,7 +108,7 @@ class Agent():
     # it retains its state with probability of the quality it sampled
     rand_n = np.random.uniform()
     if self.state == COMMITTED and self.site != message.site:
-      if quality > self.quality and rand_n > self.quality:
+      if quality > self.quality:
         self.state = NOIDEA
         self.site = 0
     elif self.state == COMMITTED:
@@ -138,7 +133,7 @@ class Agent():
           if not inrange(self.opinion, site.loc, SITE_RAD):
             # if it's not my site
             quality = site.quality #max(np.random.normal(0,0.05) + site.quality, 1)
-            if quality > self.quality or random.random() > 0.999999:
+            if quality > self.quality or random.random() > self.quality:
               self.opinion = (self.x, self.y)
               self.site = site.id
               self.quality = quality
@@ -159,8 +154,8 @@ class Target():
     # self.loc = (int(np.random.normal(MAPSIZE/2, MAPSIZE/2)) % MAPSIZE, \
     #            int(np.random.normal(MAPSIZE/2, MAPSIZE/2)) % MAPSIZE)
     self.id = id + 1
-    if self.id == 1: self.quality = 0.9
-    else: self.quality = 0.1
+    if self.id == 1: self.quality = 0.85
+    else: self.quality = 0.2
 
 class MyGame():
   def __init__(self, params, free, polling, right, wrong, width = 600, height = 600, fps = 60, title = "simulation"):
