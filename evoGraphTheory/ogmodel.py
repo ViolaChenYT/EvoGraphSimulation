@@ -3,11 +3,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 from networkx.drawing.nx_pydot import *
 from network import *
-from run_evo_robot import MUTATION_RATE
 
-N_ITER = 2000 # per trial
-n_keep=N_ITER
-MUTATION_RATE = 0.01
+'''
+landscape for S1 S2 R1 R2
+evo allowing both mutations
+'''
+N_ITER = 3000 # per trial
+n_keep = N_ITER
+MUTATION_RATE = 0.05
+
+N_TRIALS = 50
 
 MAPSIZE = 400
 # agent states
@@ -26,6 +31,7 @@ SITE_RAD = 60
 WELLMIXED = 0
 RING = 1
 STAR = 2
+d = {0:"wellmixed",1:"ring",2:"star"}
 
 class Channel():
     def __init__(self, sd): # sd = standard deviation: int / float
@@ -41,10 +47,10 @@ class Channel():
         x_noise = np.random.normal(0, self.sd)
         y_noise = np.random.normal(0, self.sd)
         return (x+x_noise, y+y_noise)
-    
+
 # comm channels
-S1 = Channel(SITE_RAD * 2)
-S2 = Channel(SITE_RAD / 2)
+S1 = Channel(SITE_RAD * 3)
+S2 = Channel(SITE_RAD / 3)
 
 def inrange(a,b,r):
   '''check if 2 centers of circle (a,b) are in range r, inrage -> True
@@ -69,7 +75,8 @@ class Agent():
     self.quality = 0 # have not seen any
     self.broadcasting = None
     self.server = server
-    self.channel = S1
+    self.schannel = S1 #s1r1 s1r2 s2r1 s2r2
+    self.rchannel = S1
     '''
     (c1,c2) = param
     self.c1 = c1
@@ -106,7 +113,7 @@ class Agent():
   def advertise(self):
     '''committed cells broadcast their opinion with probability of the quality sampled'''
     if self.state == COMMITTED and np.random.uniform() < self.quality:
-        self.broadcasting = self.channel.send(self.opinion)
+        self.broadcasting = self.schannel.send(self.opinion)
     else: self.broadcasting = None
 
   
@@ -117,7 +124,8 @@ class Agent():
     for friend in self.server.robots:
       if self == friend: continue
       if inrange((self.x,self.y), (friend.x, friend.y), COMM_RANGE):
-        if friend.broadcasting != None:
+        if friend.broadcasting != None and \
+            (friend.schannel == self.rchannel):
           friendlist.append(friend)
     if len(friendlist) == 0: 
       return
@@ -178,21 +186,25 @@ class Target():
     #            int(np.random.normal(MAPSIZE/2, MAPSIZE/2)) % MAPSIZE)
     self.id = id + 1
     if self.id == 1: self.quality = 0.9
-    else: self.quality = 0.2
+    else: self.quality = 0.1
 
 class MyGame():
-  def __init__(self, model, free, polling, right, wrong, graph, width = 600, height = 600, fps = 60, title = "simulation"):
+  def __init__(self, model, graph, width = 600, height = 600, fps = 60, title = "simulation"):
     self.width = width
     self.height = height
     self.fps = fps
     self.title = title
     self.robots = []
     self.sites = []
+    self.free = []
+    self.polling = []
+    self.right = []
+    self.wrong = []
+    self.s1r1 = []
+    self.s2r1 = []
+    self.s1r2 = []
+    self.s2r2 = []
     self.best = 0 # id of the best site
-    self.free = free
-    self.polling = polling
-    self.right = right
-    self.wrong = wrong
     self.model = model
     self.graph = graph
     self.initRobots()
@@ -223,7 +235,7 @@ class MyGame():
   def next_gen(self, scores):
     ''' take parameters and scores from the previous generation and produce the 
         parameters for the next generation
-        @param: model: 
+        @param: model
     '''
     model = self.model
     prob = softmax(scores)
@@ -233,33 +245,35 @@ class MyGame():
         for _ in range(GRAPH_SIZE):
             tobirth = np.random.choice(indices, p=prob)
             togo = np.random.randint(0, GRAPH_SIZE)
-            self.robots[togo].channel = self.robots[tobirth].channel
-            if np.random.uniform() < MUTATION_RATE:
-                self.robots[togo].channel = S2
+            while togo == tobirth: # make sure it's not same node
+              togo = np.random.randint(0, GRAPH_SIZE)
     elif model == STAR:
         for _ in range(GRAPH_SIZE):
             tobirth = np.random.choice(indices, p=prob)
             togo = np.random.choice(stargraph[tobirth])
-            self.robots[togo].channel = self.robots[tobirth].channel
-            if np.random.uniform(0,1) < MUTATION_RATE:
-                self.robots[togo].channel = S2
     elif model == RING:
         for _ in range(GRAPH_SIZE):
             tobirth = np.random.choice(indices, p=prob)
             togo = np.random.choice(ringgraph[tobirth])
-            self.robots[togo].channel = self.robots[tobirth].channel
-            if np.random.uniform(0,1) < MUTATION_RATE:
-                self.robots[togo].channel = S2
     else: 
         print("PANIC! No evolution model selected")
         raise Exception
+    self.robots[togo].schannel = self.robots[tobirth].schannel
+    self.robots[togo].rchannel = self.robots[tobirth].rchannel
+    if np.random.uniform() < MUTATION_RATE:
+        if np.random.uniform() > 0.5:
+          self.robots[togo].schannel = S2
+        else:
+          self.robots[togo].rchannel = S2
 
   # things done at each iteration
-  def timerFired(self):
-    '''each robot first sample, if they are committed, then they advertise, 
-     and all robots check what they have received
+  def timerFired(self, plot_state = True):
+    '''
+    plot_state = True <-> plot state,
+    else will plot strains ie. channels
+    - each robot first sample, if they are committed, then they advertise, 
+    and all robots check what they have received
      '''
-    cnt = 0
     for robot in self.robots:
       robot.sample()
       robot.advertise()
@@ -267,42 +281,123 @@ class MyGame():
       robot.receiveOpinion()
     for robot in self.robots:
       robot.move()
-    n_poll, n_commit, n_correct = 0,0,0
-    for robot in self.robots:
-      if robot.channel == S2:
-        cnt +=1
-      if robot.state == 1:
-        n_poll += 1
-      if robot.state == 2:
-        n_commit += 1
-        if robot.site == self.best:
-          n_correct += 1
-    fp = n_poll / NROBOT
-    fc = n_commit / NROBOT
-    fright = n_correct / NROBOT
-    n_wrong = n_commit - n_correct
-    fwrong = n_wrong / NROBOT
-    ff = 1 - fp - fc
-    self.polling.append(fp)
-    self.right.append(fright)
-    self.wrong.append(fwrong)
-    self.free.append(ff)
+      
+    ###############################################
+    #####           for plots                 #####
+    if plot_state:
+      n_poll, n_commit, n_correct = 0,0,0
+      for robot in self.robots:
+        if robot.state == 1:
+          n_poll += 1
+        if robot.state == 2:
+          n_commit += 1
+          if robot.site == self.best:
+            n_correct += 1
+      fp = n_poll / NROBOT
+      fc = n_commit / NROBOT
+      fright = n_correct / NROBOT
+      n_wrong = n_commit - n_correct
+      fwrong = n_wrong / NROBOT
+      ff = 1 - fp - fc
+      self.polling.append(fp)
+      self.right.append(fright)
+      self.wrong.append(fwrong)
+      self.free.append(ff)
+    else:
+      n_s1, n_s1r1, n_r1 = 0,0,0
+      for robot in self.robots:
+        both = 0
+        if robot.schannel == S1:
+          n_s1 += 1
+          both += 1
+        if robot.rchannel == S1:
+          n_r1 += 1
+          both += 1
+        if both == 2:
+          n_s1r1 += 1
+      n_s2 = NROBOT - n_s1
+      n_r2 = NROBOT - n_r1
+      n_s1r2 = n_s1 - n_s1r1
+      n_s2r2 = n_r2 - n_s1r2
+      n_s2r1 = n_s2 - n_s2r2
+      assert(n_s1r1 + n_s1r2 + n_s2r1 + n_s2r2 == NROBOT)
+      self.s1r1.append(n_s1r1 / NROBOT)
+      self.s1r2.append(n_s1r2 / NROBOT)
+      self.s2r1.append(n_s2r1 / NROBOT)
+      self.s2r2.append(n_s2r2 / NROBOT)
+        
+    #####            end plots                #####
+    ###############################################
+    
     # add some mutation and evolution code here
     qual = [bot.quality for bot in self.robots]
-    self.next_gen(qual)
-    if self.mutant < 1:
-        self.mutant = cnt / NROBOT
-        if self.mutant >= 1:
-            print(self.cnt)
-        print(self.mutant)
+    if not plot_state: self.next_gen(qual)
     
     
-  def run(self):
+  def run(self, plot_state = True):
     self.cnt = 0
     while self.cnt < N_ITER:
       self.cnt += 1
       # invoke everything that are supposed to happen in one time step
-      self.timerFired() 
+      self.timerFired(plot_state) 
+    print(".",end="",flush=True)
+  
+  def reshape(self, arr):
+    return np.array(arr).reshape((n_keep,1))
+  
+  def run_trials(self):
+    f, p, r, w = np.zeros((n_keep, 1)),np.zeros((n_keep, 1)),\
+                np.zeros((n_keep, 1)),np.zeros((n_keep, 1))  
+    for i in range(N_TRIALS):
+      self.__init__(model=self.model, graph = self.graph)
+      self.run()
+      f = np.add(f, self.reshape(self.free))
+      p = np.add(p, self.reshape(self.polling))
+      r = np.add(r, self.reshape(self.right) )
+      w = np.add(w, self.reshape(self.wrong))
+    f = np.divide(f, N_TRIALS)
+    p = np.divide(p, N_TRIALS)
+    r = np.divide(r, N_TRIALS)
+    w = np.divide(w, N_TRIALS)
+    plt.clf()
+    plt.plot(f, label = 'no idea')
+    plt.plot(p, label = 'polling')
+    plt.plot(r, label = 'correct site')
+    plt.plot(w, label = 'incorrect site')
+    plt.ylabel("proportion of agents in each state")
+    plt.ylim(0,1)
+    plt.legend()
+    if self.robots[0].schannel == S1:
+      str1 = 's1'
+    else: str1 = 's2'
+    if self.robots[0].rchannel == S1:
+      str2 = 'r1'
+    else: str2 = 'r2'
+    plt.savefig(f"landscape{str1}{str2}.jpg")
+    
+  def run_evo(self):
+    s1r1, s1r2, s2r1, s2r2 = np.zeros((n_keep, 1)),np.zeros((n_keep, 1)),\
+                np.zeros((n_keep, 1)),np.zeros((n_keep, 1))  
+    for i in range(N_TRIALS):
+      self.__init__(model=self.model, graph = self.graph)
+      self.run(plot_state = False)
+      s1r1 = np.add(s1r1, self.reshape(self.s1r1))
+      s1r2 = np.add(s1r2, self.reshape(self.s1r2))
+      s2r1 = np.add(s2r1, self.reshape(self.s2r1) )
+      s2r2 = np.add(s2r2, self.reshape(self.s2r2))
+    s1r1 = np.divide(s1r1, N_TRIALS)
+    s1r2 = np.divide(s1r2, N_TRIALS)
+    s2r1 = np.divide(s2r1, N_TRIALS)
+    s2r2 = np.divide(s2r2, N_TRIALS)
+    plt.clf()
+    plt.plot(s1r1, label = 'S1R1')
+    plt.plot(s1r2, label = 'S1R2')
+    plt.plot(s2r1, label = 'S2R1')
+    plt.plot(s2r2, label = 'S2R2')
+    plt.ylabel("proportion of agents in each state")
+    plt.ylim(0,1)
+    plt.legend()
+    plt.savefig(f"evo_{d[self.model]}_{N_ITER}timesteps_{N_TRIALS}runs.jpg")
 
 def softmax(scores,temp=5.0):
     ''' transforms scores to probabilites '''
@@ -324,25 +419,7 @@ if __name__ == '__main__':
     else:
         G = (wellmixed)
         model = WELLMIXED
-    frac_free = []
-    frac_polling = []
-    frac_correct = []
-    frac_wrong = []
     params = [0 for _ in range(NROBOT)]
-    game = MyGame(model, frac_free, frac_polling, frac_correct, frac_wrong, G)
-    game.run()
+    game = MyGame(model, G)
+    game.run_evo()
     
-    corrects = np.array(frac_correct[-n_keep:]).reshape((n_keep,1))
-    pollings = np.array(frac_polling[-n_keep:]).reshape((n_keep,1))
-    wrongs = np.array(frac_wrong[-n_keep:]).reshape((n_keep,1))
-    frees = np.array(frac_free[-n_keep:]).reshape((n_keep,1))
-    
-    plt.clf()
-    plt.plot(frees, label = 'no idea')
-    plt.plot( pollings, label = 'polling')
-    plt.plot( corrects, label = 'correct site')
-    plt.plot(wrongs, label = 'incorrect site')
-    plt.ylabel("proportion of agents in each state")
-    plt.ylim(0,1)
-    plt.legend()
-    plt.show()

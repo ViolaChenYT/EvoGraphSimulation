@@ -279,7 +279,7 @@ def run_one_sim(param):
     plt.ylabel("proportion of agents in each state")
     plt.ylim(0,1)
     plt.legend()
-    # Display a figure.
+    # Display a figure.x
     if N_CHEATER > 0:
       plt.savefig(f"./figures{MODEL}/{MODEL}_{N_CHEATER}_adversary_{param[0]}_average.jpg")
     else: plt.savefig(f"./figures{MODEL}/{MODEL}_noadversary_average_{param[0]}.jpg")
