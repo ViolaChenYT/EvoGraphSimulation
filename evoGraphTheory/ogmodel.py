@@ -97,6 +97,7 @@ class Agent():
     elif self.state == POLLING: # move towards target with some noise
       if inrange((self.x,self.y),self.speculation, AGENT_STEPSIZE*2):
         self.state = NOIDEA
+        dx, dy = np.random.normal(AGENT_STEPSIZE, AGENT_STEPSIZE),np.random.normal(AGENT_STEPSIZE, AGENT_STEPSIZE)
       else:
         stepsize = np.random.normal(AGENT_STEPSIZE / 2, AGENT_STEPSIZE)
         tmp = np.random.standard_normal()
@@ -104,8 +105,9 @@ class Agent():
         theta = math.atan2(ydiff, xdiff) + tmp/2
         dx = stepsize * math.cos(theta)
         dy = stepsize * math.sin(theta)
-        self.x = (self.x + dx) % self.server.width
-        self.y = (self.y + dy) % self.server.height
+      
+    self.x = (self.x + dx) % self.server.width
+    self.y = (self.y + dy) % self.server.height
   
   def advertise(self):
     '''committed cells broadcast their opinion with probability of the quality sampled'''
