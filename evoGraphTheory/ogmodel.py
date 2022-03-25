@@ -8,9 +8,9 @@ from network import *
 landscape for S1 S2 R1 R2
 evo allowing both mutations
 '''
-N_ITER = 3000 # per trial
+N_ITER = 6000 # per trial
 n_keep = N_ITER
-MUTATION_RATE = 0.05
+MUTATION_RATE = 0.02
 
 N_TRIALS = 50
 
@@ -23,7 +23,7 @@ COMMITTED = 2
 AGENT_STEPSIZE = 4
 AGENT_RADIUS = 10
 NROBOT = 15
-COMM_RANGE = 80
+COMM_RANGE = 60
 # sites param
 NSITE = 2
 SITE_RAD = 60
@@ -49,7 +49,7 @@ class Channel():
         return (x+x_noise, y+y_noise)
 
 # comm channels
-S1 = Channel(SITE_RAD * 3)
+S1 = Channel(SITE_RAD )
 S2 = Channel(SITE_RAD / 3)
 
 def inrange(a,b,r):
@@ -75,13 +75,8 @@ class Agent():
     self.quality = 0 # have not seen any
     self.broadcasting = None
     self.server = server
-    self.schannel = S1 #s1r1 s1r2 s2r1 s2r2
-    self.rchannel = S1
-    '''
-    (c1,c2) = param
-    self.c1 = c1
-    self.c2 = c2
-    '''
+    self.schannel = S2 #s1r1 s1r2 s2r1 s2r2
+    self.rchannel = S2
   def __eq__(self, other):
     return self.id == other.id
 
@@ -100,15 +95,17 @@ class Agent():
     # in polling state, it will move in the general direction of the potential target, 
     # with variation of a standard normal in radian
     elif self.state == POLLING: # move towards target with some noise
-      stepsize = np.random.normal(AGENT_STEPSIZE / 2, AGENT_STEPSIZE)
-      tmp = np.random.standard_normal()
-      xdiff, ydiff = self.speculation[0] - self.x, self.speculation[1] - self.y
-      theta = math.atan2(ydiff, xdiff) + tmp/2
-      dx = stepsize * math.cos(theta)
-      dy = stepsize * math.sin(theta)
-      
-    self.x = (self.x + dx) % self.server.width
-    self.y = (self.y + dy) % self.server.height
+      if inrange((self.x,self.y),self.speculation, AGENT_STEPSIZE*2):
+        self.state = NOIDEA
+      else:
+        stepsize = np.random.normal(AGENT_STEPSIZE / 2, AGENT_STEPSIZE)
+        tmp = np.random.standard_normal()
+        xdiff, ydiff = self.speculation[0] - self.x, self.speculation[1] - self.y
+        theta = math.atan2(ydiff, xdiff) + tmp/2
+        dx = stepsize * math.cos(theta)
+        dy = stepsize * math.sin(theta)
+        self.x = (self.x + dx) % self.server.width
+        self.y = (self.y + dy) % self.server.height
   
   def advertise(self):
     '''committed cells broadcast their opinion with probability of the quality sampled'''
@@ -162,7 +159,7 @@ class Agent():
           if not inrange(self.opinion, site.loc, SITE_RAD):
             # if it's not my site
             quality = max(np.random.normal(0,0.1) + site.quality, 1)
-            if quality > self.quality:
+            if quality > self.quality or np.random.uniform() > self.quality:
               self.opinion = (self.x, self.y)
               self.site = site.id
               self.quality = quality
@@ -409,17 +406,22 @@ def softmax(scores,temp=5.0):
         return np.array(scores) / sum(scores)
 
 if __name__ == '__main__':
-    model = sys.argv[1]
-    if model == "star":
-        G = stargraph
-        model = STAR
-    elif model == "ring":
-        G = (ringgraph)
-        model = RING
+    if (len(sys.argv)) > 1:
+      model = sys.argv[1]
+      if model == "star":
+          G = stargraph
+          model = STAR
+      elif model == "ring":
+          G = (ringgraph)
+          model = RING
+      else:
+          G = (wellmixed)
+          model = WELLMIXED
     else:
-        G = (wellmixed)
-        model = WELLMIXED
-    params = [0 for _ in range(NROBOT)]
+      model=0
+      G=wellmixed
     game = MyGame(model, G)
-    game.run_evo()
+    if (len(sys.argv)) > 1:
+      game.run_evo()
+    else: game.run_trials()
     
