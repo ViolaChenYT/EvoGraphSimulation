@@ -20,9 +20,9 @@ NOIDEA = 0
 POLLING = 1
 COMMITTED = 2
 # agent param
-AGENT_STEPSIZE = 2
+AGENT_STEPSIZE = 4
 AGENT_RADIUS = 10
-NROBOT = 30
+NROBOT = 15
 COMM_RANGE = 60
 # sites param
 NSITE = 2
@@ -32,8 +32,6 @@ WELLMIXED = 0
 RING = 1
 STAR = 2
 d = {0:"wellmixed",1:"ring",2:"star"}
-to_plot = dict()
-
 
 class Channel():
     def __init__(self, sd): # sd = standard deviation: int / float
@@ -52,7 +50,7 @@ class Channel():
 
 # comm channels
 S1 = Channel(SITE_RAD )
-S2 = Channel(0)
+S2 = Channel(SITE_RAD / 3)
 
 def inrange(a,b,r):
   '''check if 2 centers of circle (a,b) are in range r, inrage -> True
@@ -126,7 +124,7 @@ class Agent():
       if self == friend: continue
       if inrange((self.x,self.y), (friend.x, friend.y), COMM_RANGE):
         if friend.broadcasting != None and \
-            (friend.schannel == self.rchannel):
+            (friend.schannel == self.schannel):
           friendlist.append(friend)
     if len(friendlist) == 0: 
       return
@@ -260,12 +258,8 @@ class MyGame():
         print("PANIC! No evolution model selected")
         raise Exception
     self.robots[togo].schannel = self.robots[tobirth].schannel
-    self.robots[togo].rchannel = self.robots[tobirth].rchannel
     if np.random.uniform() < MUTATION_RATE:
-        if np.random.uniform() > 0.5:
-          self.robots[togo].schannel = S2
-        else:
-          self.robots[togo].rchannel = S2
+        self.robots[togo].schannel = S2
 
   # things done at each iteration
   def timerFired(self, plot_state = True):
@@ -356,19 +350,25 @@ class MyGame():
       p = np.add(p, self.reshape(self.polling))
       r = np.add(r, self.reshape(self.right) )
       w = np.add(w, self.reshape(self.wrong))
-    print()
     f = np.divide(f, N_TRIALS)
     p = np.divide(p, N_TRIALS)
     r = np.divide(r, N_TRIALS)
     w = np.divide(w, N_TRIALS)
-    to_plot[self.model] = r
-    
+    plt.clf()
+    plt.plot(f, label = 'no idea')
+    plt.plot(p, label = 'polling')
+    plt.plot(r, label = 'correct site')
+    plt.plot(w, label = 'incorrect site')
+    plt.ylabel("proportion of agents in each state")
+    plt.ylim(0,1)
+    plt.legend()
     if self.robots[0].schannel == S1:
       str1 = 's1'
     else: str1 = 's2'
     if self.robots[0].rchannel == S1:
       str2 = 'r1'
     else: str2 = 'r2'
+    plt.savefig(f"landscape{str1}{str2}.jpg")
     
   def run_evo(self):
     s1r1, s1r2, s2r1, s2r2 = np.zeros((n_keep, 1)),np.zeros((n_keep, 1)),\
@@ -384,13 +384,11 @@ class MyGame():
     s1r2 = np.divide(s1r2, N_TRIALS)
     s2r1 = np.divide(s2r1, N_TRIALS)
     s2r2 = np.divide(s2r2, N_TRIALS)
-    plt.plot(s1r1, label = 'S1R1')
-    plt.plot(s1r2, label = 'S1R2')
-    plt.plot(s2r1, label = 'S2R1')
-    plt.plot(s2r2, label = 'S2R2')
+    plt.plot(s2r1, label = f'S2 {d[model]}')
     plt.ylabel("proportion of agents in each state")
     plt.ylim(0,1)
     plt.legend()
+    plt.savefig(f"evo_{d[self.model]}_{N_ITER}timesteps_{N_TRIALS}runs.jpg")
 
 def softmax(scores,temp=5.0):
     ''' transforms scores to probabilites '''
@@ -402,34 +400,10 @@ def softmax(scores,temp=5.0):
         return np.array(scores) / sum(scores)
 
 if __name__ == '__main__':
-    if (len(sys.argv)) > 1:
-      model = sys.argv[1]
-      if model == "star":
-          G = stargraph
-          model = STAR
-      elif model == "ring":
-          G = (ringgraph)
-          model = RING
-      else:
-          G = (wellmixed)
-          model = WELLMIXED
-    else:
-      model=0
-      G=wellmixed
-    game = MyGame(model, G)
-    if (len(sys.argv)) > 1:
-      game.run_evo()
-    else: 
-      print("yeet")
-      game.run_trials()
-      game = MyGame(1, ringgraph)
-      game.run_trials()
-      game = MyGame(2, stargraph)
-      game.run_trials()
-      for model in to_plot:
-        plt.plot(to_plot[model], label = f'correct site_ model:{d[model]}')
-      plt.ylabel("proportion of agents in each state")
-      plt.ylim(0,1)
-      plt.legend()
-      plt.savefig("superimposed.jpg")
+    game = MyGame(0, wellmixed)
+    game.run_trials()
+    game = MyGame(1, ringgraph)
+    game.run_trials()
+    game = MyGame(2, stargraph)
+    game.run_trials()
     
