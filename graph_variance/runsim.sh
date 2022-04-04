@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo -e "input format: num_runs | fitness(float) | alternative fitness ...\n"
-
+rm sim.out
 g++ -o sim.out -w Evograph.cpp
 
 ID=0

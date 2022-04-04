@@ -3,6 +3,7 @@
 //  Created by Yang Ping Kuo on 5/22/19.
 //  Copyright © 2019 Yang Ping Kuo. All rights reserved.
 //
+#pragma once
 
 #include <iostream>
 #include "Simulator.h"
@@ -26,11 +27,11 @@ int main(int argc, char **argv)
     
     for(int i = 4; i < argc; ++i) {
         double fitness = atof(argv[i]);
-        printf("%d,  fitness: %f\n",i,fitness );
+        printf("fitness: %f\n",fitness );
         
         sim.simulate(runs, fitness);
-        // sim.print();
-        // sim.save();
+        sim.print();
+        sim.save();
     }
     
     /* for(int i = 4; i < argc; ++i) {
