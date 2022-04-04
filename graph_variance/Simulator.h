@@ -30,6 +30,14 @@ void permute(int *iton, int *ntoi, int index1, int index2)
     ntoi[node2] = index1;
 }
 
+void permute(double* fitness, int index1, int index2){
+    double node1 = fitness[index1];
+    double node2 = fitness[index2];
+    
+    fitness[index1] = node2;
+    fitness[index2] = node1;
+}
+
 class Simulator {
 private:
 	int popsize;
@@ -40,6 +48,8 @@ private:
 	double rt;
     ofstream file;
 	mt19937 generator;
+    void print_fit(double*);
+    double sum_over_arr(double*);
 
 public:
 	Simulator(string, string);
@@ -52,6 +62,7 @@ public:
     void save();
 };
 
+
 Simulator::Simulator(string input_name, string output_name) {
     ifstream input(input_name);
     file.open(output_name);
@@ -62,7 +73,7 @@ Simulator::Simulator(string input_name, string output_name) {
     popsize = 0;
     while (input >> node)
     {
-        popsize = popsize < node ? node: popsize;
+        popsize = (popsize < node) ? node: popsize;
         if (i % 2 == 0)
             out.push_back(node);
         else
@@ -72,6 +83,7 @@ Simulator::Simulator(string input_name, string output_name) {
     if (out.size() != in.size())
         throw invalid_argument("in and out should have same length");
     ++popsize;
+    // cout << popsize << endl;
     generator = mt19937((unsigned int)time(NULL));
     
     degrees = new int[popsize];
@@ -114,13 +126,33 @@ Simulator::~Simulator()
     file.close();
 }
 
+void Simulator::print_fit(double* fitness){
+    for (int i = 0; i < popsize;i++){
+        printf("%.3f ", fitness[i]);
+    }
+    cout << endl;
+}
+
+double Simulator::sum_over_arr(double* fitness){
+    double ans = 0;
+    for (int i = 0; i < popsize;i++){
+        ans = ans + fitness[i];
+    }
+    return ans;
+}
+
 
 void Simulator::simulate(double s = 0)
 {
     this->s = s;
     uniform_real_distribution<double> rand(0.0, 1.0);
+    uniform_real_distribution<double> randsmall(-0.05, 0.05);
     
-    double fitness[] = { 1.f, 1.f + s };
+    double *fitness = new double[popsize];
+    fill_n(fitness, popsize, 1.);
+    fitness[popsize-1] = 1. + s;
+    // print_fit(fitness);
+    
     int populations[] = { popsize - 1, 1 };
     
     int *ntoi = new int[popsize];
@@ -136,16 +168,21 @@ void Simulator::simulate(double s = 0)
     
     //int index2 = popsize - 1;
     int index2 = (int)(rand(generator) * popsize);
+    if (index2 == popsize){
+        printf("yikes\n");
+    }
     
     mutant[iton[index2]] = 1;
     permute(iton, ntoi, populations[0], index2);
     int t = 0;
     
+    // population[0]: no. of WT, pop[1]: no. of mutant
     while (populations[0] != 0 && populations[1] != 0)
     {
         ++t;
-        double bar = populations[0] * fitness[0];
-        double totalFitness = bar + populations[1] * fitness[1];
+        
+        double bar = populations[0]; // default fitness = 1
+        double totalFitness = sum_over_arr(fitness);
         
         double birth = totalFitness * rand(generator);
         int birthIndex, birthNode, deathIndex, deathNode;
@@ -163,21 +200,34 @@ void Simulator::simulate(double s = 0)
         
         deathIndex = (int)(degrees[birthNode] * rand(generator));
         deathNode = edgelist[birthNode][deathIndex];
-       
-        if (mutant[deathNode] == mutant[birthNode])
+        // printf("%d -> %d\n", birthNode, deathNode);
+        fitness[deathNode] = fitness[birthNode];
+        if (mutant[deathNode] == mutant[birthNode]){
+            if (mutant[birthNode]==1)
+                fitness[deathNode] = 1 + randsmall(generator);
             continue;
+        }
         
         if (mutant[deathNode] == 1)
         {
             --populations[1];
             index2 = populations[0];
+            if (index2 == popsize){
+                printf("rip\n");
+            }
             permute(iton, ntoi, ntoi[deathNode], index2);
+            permute(fitness, ntoi[deathNode], index2);
         }
         else
         {
             --populations[0];
             index2 = (popsize - 1) - populations[1];
+            if (index2 < 0){
+                printf("big rip\n");
+            }
+            fitness[deathNode] = 1 + randsmall(generator);
             permute(iton, ntoi, ntoi[deathNode], index2);
+            permute(fitness, ntoi[deathNode], index2);
         }
         
         if (mutant[birthNode] == 1)
@@ -230,8 +280,9 @@ void Simulator::simulate_dB(double s = 0)
 {
     this->s = s;
     uniform_real_distribution<double> rand(0.0, 1.0);
+    uniform_real_distribution<double> randsmall(-0.05, 0.05);
     
-    double fitness[] = { 1.f, 1.f + s };
+    double fitness[] = { 1.0, 1.0 + s };
     int populations[] = { popsize - 1, 1 };
     
     double *localFitness = new double[popsize];
@@ -255,7 +306,7 @@ void Simulator::simulate_dB(double s = 0)
     }
     
     int t = 0;
-    while (populations[0] != 0 && populations[1] != 0)
+    while (populations[0] != 0 && populations[1] != 0) // what does this mean?
     {
         ++t;
         deathnode = (int)(rand(generator) * popsize);
@@ -339,7 +390,7 @@ void Simulator::simulate_dB(int trials, double s = 0.0)
 
 void Simulator::print()
 {
-    printf("%f : %d,\t%d,\t%f,\t%f,\t%f\n", s, counts[0], counts[1], times[0], times[1], rt);
+    printf("fitness: %f : %d,\t%d,\ntimes: \t%f,\t%f,\t%f\n", s, counts[0], counts[1], times[0], times[1], rt);
 }
 
 // save results of the simulations to output file stream

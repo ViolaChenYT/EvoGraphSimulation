@@ -15,7 +15,7 @@ using namespace std;
 int main(int argc, char **argv)
 {
     if (argc < 5) {
-        cout << "Not enough arguments!" << endl;
+        cout << "input format: graph_file | output_filename | num_runs | fitness(float) | alternative fitness ..." << endl;
         exit(1);
     }
     
@@ -23,26 +23,24 @@ int main(int argc, char **argv)
     Simulator sim(argv[1], argv[2]);
     
     int runs = atoi(argv[3]);
-    cout << input << endl;
-    cout << runs << endl;
     
     for(int i = 4; i < argc; ++i) {
-        double s = atof(argv[i]);
-        cout << s << endl;
+        double fitness = atof(argv[i]);
+        printf("%d,  fitness: %f\n",i,fitness );
         
-        sim.simulate(runs, s);
-        sim.print();
-        sim.save();
+        sim.simulate(runs, fitness);
+        // sim.print();
+        // sim.save();
     }
     
-    for(int i = 4; i < argc; ++i) {
-        double s = atof(argv[i]);
-        cout << s << endl;
+    /* for(int i = 4; i < argc; ++i) {
+        double fitness = atof(argv[i]);
+        cout << fitness << endl;
         
-        sim.simulate_dB(runs, s);
+        sim.simulate_dB(runs, fitness);
         sim.print();
         sim.save();
-    }
+    } */
     
     
     return 1;

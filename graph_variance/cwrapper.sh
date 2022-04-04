@@ -5,5 +5,6 @@ i=$((i+1))
 x=$(sed "${i}q;d" parameters.in | awk '{print $1}')
 y=$(sed "${i}q;d" parameters.in | awk '{print $2}')
 
-./main $x $y 200000 0.01 0.05 0.1
+# original: 20000 runs
+./main $x $y 1000 0.01 0.05 0.1
 
