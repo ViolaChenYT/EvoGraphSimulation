@@ -74,6 +74,7 @@ private:
     double sum_over_arr(double*);
 
 public:
+    double fit;
 	Simulator(string, string);
     ~Simulator();
     void simulate(double,double);
@@ -86,6 +87,7 @@ public:
 
 
 Simulator::Simulator(string input_name, string output_name) {
+    this->fit = 5;
     ifstream input(input_name);
     file.open(output_name);
     
@@ -97,7 +99,6 @@ Simulator::Simulator(string input_name, string output_name) {
     {
         popsize = (popsize < node1) ? node1: popsize;
         popsize = (popsize < node2) ? node2: popsize;
-        // printf("node1 %d, node2 %d\n",node1,node2);
         out.push_back(node1);
         in.push_back(node2);
         ++i;
@@ -168,7 +169,6 @@ void Simulator::simulate(double s = 0, double var = 0)
     this->s = s;
     this->var = var;
     uniform_real_distribution<double> rand(0.0, 1.0);
-    // printf("%f\n",var);
     uniform_real_distribution<double> randsmall(-var, var);
     
     int populations[] = { popsize - 1, 1 };
@@ -190,20 +190,13 @@ void Simulator::simulate(double s = 0, double var = 0)
     
     //int index2 = popsize - 1;
     int index2 = (int)(rand(generator) * popsize);
-    if (index2 == popsize){
-        printf("yikes\n");
-    }
-    
-    mutant[iton[index2]] = 2;
-    fitness[iton[index2]] = 2 + s;
+    mutant[iton[index2]] = 1;
+    fitness[iton[index2]] = fit + s + randsmall(generator);
     permute(iton, ntoi, populations[0], index2);
     int t = 0;
     // population[0]: no. of WT, pop[1]: no. of mut
-    while (populations[0] != 0 && populations[1] != 0)
-    {
+    while (populations[0] != 0 && populations[1] != 0){
         ++t;
-        
-        double bar = populations[0]; // default fitness = 1
         double acc = 0;
         // calculate accummulated fitness
         for (int i = 0;i<popsize;i++){
@@ -215,55 +208,32 @@ void Simulator::simulate(double s = 0, double var = 0)
         int birthIndex, birthNode, deathIndex, deathNode;
         // bin search to find birth node
         birthNode = binsearch(acc_fit,0,popsize-1,birth);
-        // printf("birthnode, %d\n", birthNode);
+        //printf("birthnode, %d -- %d\n", birthNode, mutant[birthNode]);
+        //print_fit(fitness);
         if (birthNode == -1){
             printf("f\n");
             print_fit(acc_fit);
         }
-        birthIndex = ntoi[birthNode];
-        // printf("%d,%d,%d,%d\n",birthIndex,birthNode,deathIndex,deathNode);
         deathIndex = (int)(degrees[birthNode] * rand(generator));
         int* edges = edgelist[birthNode];
         deathNode = edges[deathIndex];
-        // printf("just to confirm\n");
         if (mutant[deathNode] == mutant[birthNode]){
-            if (mutant[birthNode]==1){
-                fitness[deathNode] = 2 + s +randsmall(generator);
-                // printf("%f\n", fitness[deathNode]);
-            }
             continue;
         }
-        // printf("got here\n");
-        if (mutant[deathNode] == 1)
-        {
+        if (mutant[deathNode] == 1){
             --populations[1];
+            ++populations[0];
             index2 = populations[0];
-            if (index2 == popsize){
-                printf("rip\n");
-            }
-            permute(iton, ntoi, ntoi[deathNode], index2);
+            fitness[deathNode] = fit;
+            mutant[deathNode] = 0;
         }
-        else
-        {
+        else {
+            ++populations[1];
             --populations[0];
             index2 = (popsize - 1) - populations[1];
-            if (index2 < 0){
-                printf("big rip\n");
-            }
-            fitness[deathNode] = 2 + s + randsmall(generator);
-            // printf("%f\n", fitness[deathNode]);
-            permute(iton, ntoi, ntoi[deathNode], index2);
-            //permute(fitness, ntoi[deathNode], index2);
-        }
-        
-        if (mutant[birthNode] == 1)
-            ++populations[1];
-        else
-            ++populations[0];
-        
-        mutant[deathNode] = mutant[birthNode];
-        fitness[deathNode] = fitness[birthNode];
-        //printf("end of loops\n");
+            fitness[deathNode] = fit + s + randsmall(generator);
+            mutant[deathNode] = 1;
+        }   
     }
     
     if (populations[0] == 0)
@@ -293,7 +263,9 @@ void Simulator::simulate(int trials, double s = 0.0, double var = 0)
     printf("trials: %d\n",trials);
     for (int i = 0; i < trials; ++i)
     {
-        //cout << "run " << i << endl;
+        if (i % 20 == 0) {
+            cout << "." << flush;
+        }
         simulate(s,var);
     }
     
@@ -417,7 +389,7 @@ void Simulator::simulate_dB(int trials, double s = 0.0)
 
 void Simulator::print(){
     double total = counts[0] + counts[1];
-    printf("prob. ext = %.3f, prob. fix = %.3f,\n times: \t%f,\t%f\n", counts[0]/total, counts[1]/total, times[0], times[1]);
+    printf("prob. ext = %.5f, prob. fix = %.5f,\n times: \t%f,\t%f\n", counts[0]/total, counts[1]/total, times[0], times[1]);
 }
 
 // save results of the simulations to output file stream
