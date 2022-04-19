@@ -16,22 +16,23 @@ using namespace std;
 int main(int argc, char **argv)
 {
     if (argc < 6) {
-        cout << "input format: graph_file | output_filename | num_runs | fitness(float) | var in fitness" << endl;
+        //cout << "input format: graph_file | output_filename | num_runs | base fitness | fitness(float) | var in fitness" << endl;
         exit(1);
     }
     
     string input = argv[1];
-    Simulator sim(argv[1], argv[2]);
     
     int runs = atoi(argv[3]);
     
-    double fitness = atof(argv[4]);
-    double var = atof(argv[5]);
-    printf("fitness: %f, var: %f\n",fitness, var );
+    double fit = atof(argv[4]);
+    Simulator sim(argv[1], argv[2],fit);
+    double fitness = atof(argv[5]);
+    double var = atof(argv[6]);
+    printf("%f\t%f\t",fit,var);
     
     sim.simulate(runs, fitness, var);
     sim.print();
-    sim.save();
+    //sim.save();
     
     
     /* for(int i = 4; i < argc; ++i) {

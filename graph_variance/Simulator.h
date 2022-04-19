@@ -75,7 +75,7 @@ private:
 
 public:
     double fit;
-	Simulator(string, string);
+	Simulator(string, string,double);
     ~Simulator();
     void simulate(double,double);
     void simulate(int, double,double);
@@ -86,8 +86,8 @@ public:
 };
 
 
-Simulator::Simulator(string input_name, string output_name) {
-    this->fit = 5;
+Simulator::Simulator(string input_name, string output_name, double fit) {
+    this->fit = fit;
     ifstream input(input_name);
     file.open(output_name);
     
@@ -106,7 +106,6 @@ Simulator::Simulator(string input_name, string output_name) {
     if (out.size() != in.size())
         throw invalid_argument("in and out should have same length");
     ++popsize;
-    cout << "popsize " << popsize << endl;
     generator = mt19937((unsigned int)time(NULL));
     
     degrees = new int[popsize];
@@ -170,6 +169,8 @@ void Simulator::simulate(double s = 0, double var = 0)
     this->var = var;
     uniform_real_distribution<double> rand(0.0, 1.0);
     uniform_real_distribution<double> randsmall(-var, var);
+    poisson_distribution<int> poi(fit);
+    bernoulli_distribution rolldie(0.5);
     
     int populations[] = { popsize - 1, 1 };
     
@@ -190,9 +191,16 @@ void Simulator::simulate(double s = 0, double var = 0)
     
     //int index2 = popsize - 1;
     int index2 = (int)(rand(generator) * popsize);
-    mutant[iton[index2]] = 1;
-    fitness[iton[index2]] = fit + s + randsmall(generator);
-    permute(iton, ntoi, populations[0], index2);
+    mutant[index2] = 1;
+    fitness[index2] = fit + s + randsmall(generator);
+    /* double offset;
+    if (rolldie(generator)){
+        offset = var;
+    } else{
+        offset = -var;
+    }
+    fitness[index2] = fit + s + offset; */
+    
     int t = 0;
     // population[0]: no. of WT, pop[1]: no. of mut
     while (populations[0] != 0 && populations[1] != 0){
@@ -209,7 +217,7 @@ void Simulator::simulate(double s = 0, double var = 0)
         // bin search to find birth node
         birthNode = binsearch(acc_fit,0,popsize-1,birth);
         //printf("birthnode, %d -- %d\n", birthNode, mutant[birthNode]);
-        //print_fit(fitness);
+        // print_fit(fitness);
         if (birthNode == -1){
             printf("f\n");
             print_fit(acc_fit);
@@ -223,15 +231,21 @@ void Simulator::simulate(double s = 0, double var = 0)
         if (mutant[deathNode] == 1){
             --populations[1];
             ++populations[0];
-            index2 = populations[0];
             fitness[deathNode] = fit;
             mutant[deathNode] = 0;
         }
         else {
             ++populations[1];
             --populations[0];
-            index2 = (popsize - 1) - populations[1];
             fitness[deathNode] = fit + s + randsmall(generator);
+            /* double offset;
+            if (rolldie(generator)){
+                offset = var;
+            } else{
+                offset = -var;
+            }
+            fitness[deathNode] = fit + s + offset; */
+
             mutant[deathNode] = 1;
         }   
     }
@@ -260,7 +274,6 @@ void Simulator::simulate(int trials, double s = 0.0, double var = 0)
     counts[1] = 0;
     times[0] = 0;
     times[1] = 0;
-    printf("trials: %d\n",trials);
     for (int i = 0; i < trials; ++i)
     {
         if (i % 20 == 0) {
@@ -272,7 +285,7 @@ void Simulator::simulate(int trials, double s = 0.0, double var = 0)
     times[0] /= counts[0];
     times[1] /= counts[1];
     this->rt = static_cast<double>(clock() - start) / CLOCKS_PER_SEC;
-    cout << rt << endl;
+    // cout << rt << endl;
 }
 
 // simulates 1 death-birth process on network
@@ -389,7 +402,7 @@ void Simulator::simulate_dB(int trials, double s = 0.0)
 
 void Simulator::print(){
     double total = counts[0] + counts[1];
-    printf("prob. ext = %.5f, prob. fix = %.5f,\n times: \t%f,\t%f\n", counts[0]/total, counts[1]/total, times[0], times[1]);
+    printf("%.5f\n", counts[1]/total);
 }
 
 // save results of the simulations to output file stream
