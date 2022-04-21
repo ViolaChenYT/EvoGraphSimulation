@@ -189,14 +189,15 @@ void Simulator::simulate(double s = 0, double var = 0)
     int index2 = (int)(rand(generator) * popsize);
     mutant[index2] = 1;
     // fitness[index2] = fit + s + randsmall(generator);
-    double offset;
+    fitness[index2] =  poi(generator); // fit + s + randsmall(generator);
+    /* double offset;
     if (rolldie(generator)){
         offset = var;
     } else{
         offset = -var;
     }
     fitness[index2] = fit + s + offset;
-    
+    */
     int t = 0;
     // population[0]: no. of WT, pop[1]: no. of mut
     while (populations[0] != 0 && populations[1] != 0){
@@ -235,14 +236,15 @@ void Simulator::simulate(double s = 0, double var = 0)
             ++populations[1];
             --populations[0];
             mutant[deathNode] = 1;
-            // fitness[deathNode] = fit + s + randsmall(generator);
-            double offset;
+            fitness[deathNode] = poi(generator);// fit + s + randsmall(generator);
+            /* double offset;
             if (rolldie(generator)){
                 offset = var;
             } else{
                 offset = -var;
             }
             fitness[deathNode] = fit + s + offset;
+            */
         }   
     }
     
