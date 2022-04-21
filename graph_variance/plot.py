@@ -24,6 +24,19 @@ def plot_poi():
   plt.legend()
   plt.title('p-fix Poisson, 100000 runs')
   plt.savefig('pfix-poisson.jpg')
+  
+def plot_wellmixed():
+  d0 = pd.read_csv('./results/wellmixed_diffs_var0.txt',sep='\t',header=None)
+  plt.plot(d0.iloc[:,2], d0.iloc[:,3], label = 'variance = 0')
+  d1 = pd.read_csv('./results/wellmixed_diffs_var.05.txt',sep='\t',header=None)
+  plt.plot(d0.iloc[:,2], d1.iloc[:,3], label = 'variance = 0.05')
+  d2 = pd.read_csv('./results/wellmixed_diffs_var.1.txt',sep='\t',header=None)
+  plt.plot(d0.iloc[:,2], d2.iloc[:,3], label = 'variance = 0.1')
+  d3 = pd.read_csv('./results/wellmixed_diffs_var.15.txt',sep='\t',header=None)
+  plt.plot(d0.iloc[:,2], d3.iloc[:,3], label = 'variance = 0.15')
+  plt.xlabel('selection s')
+  plt.legend()
+  plt.show()
 
 if __name__ == '__main__':
-  plot_poi()
+  plot_wellmixed()
