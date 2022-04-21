@@ -25,7 +25,7 @@ int binsearch(double arr[], int lo, int hi, double x)
         int mid = lo + (hi - lo) / 2;
         // If the element is present at the middle
         // itself
-        if (arr[mid] < x && arr[mid+1]>=x)
+        if (arr[mid] >= x && arr[mid-1]<x)
             return mid;
 
         // If element is smaller than mid, then
@@ -150,7 +150,8 @@ Simulator::~Simulator()
 
 void Simulator::print_fit(double* fitness){
     for (int i = 0; i < popsize;i++){
-        printf("%.3f ", fitness[i]);
+        if (fitness[i] > 1)
+            printf("%.2f\t", fitness[i]);
     }
     cout << endl;
 }
@@ -173,20 +174,16 @@ void Simulator::simulate(double s = 0, double var = 0)
     bernoulli_distribution rolldie(0.5);
     
     int populations[] = { popsize - 1, 1 };
-    
-    int *ntoi = new int[popsize];
-    int *iton = new int[popsize];
+
     int *mutant = new int[popsize];
     double *fitness = new double[popsize]; 
     // fitness and acc_fitness index follows mutant idx, and same as b/dNode
     double *acc_fit = new double[popsize];
-    // print_fit(fitness);
+    // 
     for (int i = 0; i < popsize; ++i)
     {
-        ntoi[i] = i;
-        iton[i] = i;
         mutant[i] = 0;
-        fitness[i] = 1;
+        fitness[i] = fit;
     }
     
     //int index2 = popsize - 1;
@@ -206,6 +203,7 @@ void Simulator::simulate(double s = 0, double var = 0)
     while (populations[0] != 0 && populations[1] != 0){
         ++t;
         double acc = 0;
+        // print_fit(fitness);
         // calculate accummulated fitness
         for (int i = 0;i<popsize;i++){
             acc = acc + fitness[i];
@@ -216,8 +214,7 @@ void Simulator::simulate(double s = 0, double var = 0)
         int birthIndex, birthNode, deathIndex, deathNode;
         // bin search to find birth node
         birthNode = binsearch(acc_fit,0,popsize-1,birth);
-        //printf("birthnode, %d -- %d\n", birthNode, mutant[birthNode]);
-        // print_fit(fitness);
+        //printf("birthnode, %d -- %.2f\n", birthNode, birth);
         if (birthNode == -1){
             printf("f\n");
             print_fit(acc_fit);
@@ -225,6 +222,7 @@ void Simulator::simulate(double s = 0, double var = 0)
         deathIndex = (int)(degrees[birthNode] * rand(generator));
         int* edges = edgelist[birthNode];
         deathNode = edges[deathIndex];
+        //printf("birth: %d, death: %d\n", birthNode, deathNode);
         if (mutant[deathNode] == mutant[birthNode]){
             continue;
         }
@@ -237,6 +235,7 @@ void Simulator::simulate(double s = 0, double var = 0)
         else {
             ++populations[1];
             --populations[0];
+            mutant[deathNode] = 1;
             fitness[deathNode] = fit + s + randsmall(generator);
             /* double offset;
             if (rolldie(generator)){
@@ -245,8 +244,6 @@ void Simulator::simulate(double s = 0, double var = 0)
                 offset = -var;
             }
             fitness[deathNode] = fit + s + offset; */
-
-            mutant[deathNode] = 1;
         }   
     }
     
@@ -261,8 +258,6 @@ void Simulator::simulate(double s = 0, double var = 0)
         times[0] += t;
     }
     delete[] mutant;
-    delete[] ntoi;
-    delete[] iton;
 }
 // simulate birth-death processes for input trial number of times
 void Simulator::simulate(int trials, double s = 0.0, double var = 0)
@@ -277,7 +272,7 @@ void Simulator::simulate(int trials, double s = 0.0, double var = 0)
     for (int i = 0; i < trials; ++i)
     {
         if (i % 20 == 0) {
-            cout << "." << flush;
+            //cout << "." << flush;
         }
         simulate(s,var);
     }

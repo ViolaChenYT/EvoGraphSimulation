@@ -12,7 +12,7 @@ fi
 FIT_VAR=${5:-1}
 OUTPUT_FILE=results/${FIT_VAR}.txt
 NUM_RUNS=${2:-1000}
-BASE_FIT=${3:-1}
+BASE_FIT=${3:-10}
 FIT_ADV=${4:-0}
 
 

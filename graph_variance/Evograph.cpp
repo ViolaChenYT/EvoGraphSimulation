@@ -26,11 +26,11 @@ int main(int argc, char **argv)
     
     double fit = atof(argv[4]);
     Simulator sim(argv[1], argv[2],fit);
-    double fitness = atof(argv[5]);
+    double s = atof(argv[5]);
     double var = atof(argv[6]);
-    printf("%f\t%f\t",fit,var);
+    printf("%f\t%f\t%f\t",fit,var,s);
     
-    sim.simulate(runs, fitness, var);
+    sim.simulate(runs, s, var);
     sim.print();
     //sim.save();
     
