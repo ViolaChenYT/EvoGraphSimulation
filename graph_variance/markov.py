@@ -31,6 +31,9 @@ def sim_1d():
           population[1] += 1
   return population[0] / n
 
+def get1dvar():
+  data = np.load('./1dsimresult.npy')
+
 def get1d_dist():
   nruns = 10000
   ''' data = np.zeros((nruns,))
@@ -49,6 +52,9 @@ def get1d_dist():
   plt.savefig('1dmarkov_pdf.png')
   
 def sim_2d():
+  pass
+
+def get2d_dist():
   pass
 
 if __name__ == '__main__':
