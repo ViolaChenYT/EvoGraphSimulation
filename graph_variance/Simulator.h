@@ -189,7 +189,7 @@ void Simulator::simulate(double s = 0, double var = 0)
     //int index2 = popsize - 1;
     int index2 = (int)(rand(generator) * popsize);
     mutant[index2] = 1;
-    fitness[index2] = fit + s + randsmall(generator);
+    fitness[index2] =  poi(generator); // fit + s + randsmall(generator);
     /* double offset;
     if (rolldie(generator)){
         offset = var;
@@ -236,7 +236,7 @@ void Simulator::simulate(double s = 0, double var = 0)
             ++populations[1];
             --populations[0];
             mutant[deathNode] = 1;
-            fitness[deathNode] = fit + s + randsmall(generator);
+            fitness[deathNode] = poi(generator);// fit + s + randsmall(generator);
             /* double offset;
             if (rolldie(generator)){
                 offset = var;
