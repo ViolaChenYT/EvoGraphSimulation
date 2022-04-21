@@ -77,8 +77,8 @@ public:
     double fit;
 	Simulator(string, string,double);
     ~Simulator();
-    void simulate(double,double);
-    void simulate(int, double,double);
+    void simulate(double,double,string);
+    void simulate(int, double,double, string);
     void simulate_dB(double);
     void simulate_dB(int, double);
     void print();
@@ -164,7 +164,7 @@ double Simulator::sum_over_arr(double* fitness){
     return ans;
 }
 
-void Simulator::simulate(double s = 0, double var = 0)
+void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform")
 {
     this->s = s;
     this->var = var;
@@ -189,15 +189,19 @@ void Simulator::simulate(double s = 0, double var = 0)
     //int index2 = popsize - 1;
     int index2 = (int)(rand(generator) * popsize);
     mutant[index2] = 1;
-    fitness[index2] =  poi(generator); // fit + s + randsmall(generator);
-    /* double offset;
-    if (rolldie(generator)){
-        offset = var;
-    } else{
-        offset = -var;
+    if (dist == "poisson")
+        fitness[index2] =  poi(generator);
+    else if (dist == "uniform")
+        fitness[index2] = fit + s + randsmall(generator);
+    else if (dist == "binom"){
+        double offset;
+        if (rolldie(generator)){
+            offset = var;
+        } else{
+            offset = -var;
+        }
+        fitness[index2] = fit + s + offset; 
     }
-    fitness[index2] = fit + s + offset; */
-    
     int t = 0;
     // population[0]: no. of WT, pop[1]: no. of mut
     while (populations[0] != 0 && populations[1] != 0){
@@ -236,15 +240,20 @@ void Simulator::simulate(double s = 0, double var = 0)
             ++populations[1];
             --populations[0];
             mutant[deathNode] = 1;
-            fitness[deathNode] = poi(generator);// fit + s + randsmall(generator);
-            /* double offset;
-            if (rolldie(generator)){
-                offset = var;
-            } else{
-                offset = -var;
+            if (dist == "poisson")
+                fitness[index2] =  poi(generator);
+            else if (dist == "uniform")
+                fitness[index2] = fit + s + randsmall(generator);
+            else if (dist == "binom"){
+                double offset;
+                if (rolldie(generator)){
+                    offset = var;
+                } else{
+                    offset = -var;
+                }
+                fitness[index2] = fit + s + offset; 
             }
-            fitness[deathNode] = fit + s + offset; */
-        }   
+        }
     }
     
     if (populations[0] == 0)
@@ -260,7 +269,7 @@ void Simulator::simulate(double s = 0, double var = 0)
     delete[] mutant;
 }
 // simulate birth-death processes for input trial number of times
-void Simulator::simulate(int trials, double s = 0.0, double var = 0)
+void Simulator::simulate(int trials, double s = 0.0, double var = 0, string dist = "uniform")
 {
     generator = mt19937((unsigned int)time(NULL));
     clock_t start = clock();
@@ -274,7 +283,7 @@ void Simulator::simulate(int trials, double s = 0.0, double var = 0)
         if (i % 20 == 0) {
             //cout << "." << flush;
         }
-        simulate(s,var);
+        simulate(s,var,dist);
     }
     
     times[0] /= counts[0];

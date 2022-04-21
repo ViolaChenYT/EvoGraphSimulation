@@ -23,14 +23,15 @@ int main(int argc, char **argv)
     string input = argv[1];
     
     int runs = atoi(argv[3]);
-    
-    double fit = atof(argv[4]);
+    string dist = argv[4];
+    double fit = atof(argv[5]);
     Simulator sim(argv[1], argv[2],fit);
-    double s = atof(argv[5]);
-    double var = atof(argv[6]);
+    double s = atof(argv[6]);
+    double var = atof(argv[7]);
+    cout << dist << "\t";
     printf("%f\t%f\t%f\t",fit,var,s);
     
-    sim.simulate(runs, s, var);
+    sim.simulate(runs, s, var, dist = dist);
     sim.print();
     //sim.save();
     
