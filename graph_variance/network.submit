@@ -1,5 +1,5 @@
 Universe = vanilla
-Executable = windowsize.sh
+Executable = variance.sh
 Arguments = $(process)
 
 
@@ -11,7 +11,9 @@ Log = log/osgJob.$(process).log
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 Notification = never
-transfer_input_files=runsim.sh, Evograph.cpp, Simulator.h, sim.out, graphs, results
-transfer_output_files = results
+transfer_input_files=sim.out, graphs, results
+transfer_output_files = poisson_variance_star.txt
 
-Queue 50
+requirements = (HAS_FILE_usr_lib64_libgmp_so_3 == true)
+
+Queue 100
