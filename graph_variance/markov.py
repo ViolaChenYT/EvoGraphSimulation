@@ -31,6 +31,15 @@ def sim_1d():
           population[1] += 1
   return population[0] / n
 
+def get1dvar():
+  data = np.load('./1dsimresult.npy')
+  mean = np.mean(data)
+  zeromean = data - mean
+  n = data.shape[0]
+  sample_var = np.sum(np.square(zeromean)) / (n-1)
+  print(np.sqrt(sample_var))
+  return sample_var
+
 def get1d_dist():
   nruns = 10000
   ''' data = np.zeros((nruns,))
@@ -51,11 +60,14 @@ def get1d_dist():
 def sim_2d():
   pass
 
+def get2d_dist():
+  pass
+
 if __name__ == '__main__':
   if len(sys.argv) < 2:
     raise Exception('Error: Please enter arguments')
   if sys.argv[1] == '1d':
-    get1d_dist()
+    get1dvar()
   elif sys.argv[1] == '2d':
     sim_2d()
   else:

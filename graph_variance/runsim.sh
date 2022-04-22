@@ -9,12 +9,13 @@ if [[ ! -f $GRAPH_FILE ]]; then
 	echo -e "graph file not found"
 	exit;
 fi
-FIT_VAR=${5:-1}
+FIT_VAR=${6:-1}
 OUTPUT_FILE=results/${FIT_VAR}.txt
 NUM_RUNS=${2:-1000}
-BASE_FIT=${3:-1}
-FIT_ADV=${4:-0}
+DIST=${3:-"uniform"}
+BASE_FIT=${4:-10}
+FIT_ADV=${5:-0}
 
 
-./sim.out $GRAPH_FILE $OUTPUT_FILE $NUM_RUNS $BASE_FIT $FIT_ADV $FIT_VAR
+./sim.out $GRAPH_FILE $OUTPUT_FILE $NUM_RUNS $DIST $BASE_FIT $FIT_ADV $FIT_VAR
 # eg. ./runsim.sh wellmixed 10000 5
