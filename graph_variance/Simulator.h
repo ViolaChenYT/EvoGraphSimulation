@@ -144,7 +144,6 @@ Simulator::~Simulator()
     }
     delete [] edgelist;
     delete [] degrees;
-    file.close();
 }
 
 void Simulator::print_fit(double* fitness){

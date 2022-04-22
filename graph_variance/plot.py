@@ -16,13 +16,13 @@ def plot_window():
 def plot_poi():
   data = pd.read_csv('./results/poisson.txt',sep='\t',header=None)
   plt.plot(data.iloc[:,0], data.iloc[:,3],label = 'Poisson')
-  data = pd.read_csv('./results/wellmixed_check_var.txt',sep='\t',header=None)
-  plt.plot(data.iloc[:,1], data.iloc[:,3],label = 'uniform continuous')
+  data = pd.read_csv('./results/cmp_poisson.txt',sep='\t',header=None)
+  plt.plot(data.iloc[:,1], data.iloc[:,4],label = 'uniform continuous')
   plt.xlabel('variance')
   plt.ylabel('probability of fixation')
   plt.title('selection: s = 0.05')
   plt.legend()
-  plt.savefig('pfix-poisson-uniform.png')
+  plt.savefig('poisson-uniform.png')
   
 def plot_wellmixed():
   d0 = pd.read_csv('./results/wellmixed_diffs_var0.txt',sep='\t',header=None)
@@ -49,4 +49,5 @@ def uniform_binom_var():
 
 if __name__ == '__main__':
   # plot_wellmixed()
-  uniform_binom_var()
+  # uniform_binom_var()
+  plot_poi()

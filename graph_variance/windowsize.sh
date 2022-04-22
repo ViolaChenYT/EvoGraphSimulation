@@ -5,5 +5,5 @@ C=0.05
 for i in {1..100}
 do
 	param=$(echo "scale=4;$C*$i" |bc)
-	./runsim.sh wellmixed 80000 "uniform" $param 0.05 $param >> ./results/cmp_poisson.txt
+	./runsim.sh star 10000 "binom" 5 0 $param >> ./results/star_binom_var.txt
 done
