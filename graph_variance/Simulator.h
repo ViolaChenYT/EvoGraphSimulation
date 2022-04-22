@@ -188,7 +188,6 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform")
     //int index2 = popsize - 1;
     int index2 = (int)(rand(generator) * popsize);
     mutant[index2] = 1;
-<<<<<<< HEAD
     if (dist == "poisson")
         fitness[index2] =  poi(generator);
     else if (dist == "uniform")
@@ -202,18 +201,6 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform")
         }
         fitness[index2] = fit + s + offset; 
     }
-=======
-    // fitness[index2] = fit + s + randsmall(generator);
-    fitness[index2] =  poi(generator); // fit + s + randsmall(generator);
-    /* double offset;
-    if (rolldie(generator)){
-        offset = var;
-    } else{
-        offset = -var;
-    }
-    fitness[index2] = fit + s + offset;
-    */
->>>>>>> 22730c7fba4da2bbd98e1140699ab9be86c48fdc
     int t = 0;
     // population[0]: no. of WT, pop[1]: no. of mut
     while (populations[0] != 0 && populations[1] != 0){
