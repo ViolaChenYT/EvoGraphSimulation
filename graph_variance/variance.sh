@@ -2,7 +2,7 @@
 
 C=0.05
 
-ID=star
+ID=wellmixed
 
 GRAPH_FILE=graphs/$ID.txt
 
@@ -11,13 +11,13 @@ if [[ ! -f $GRAPH_FILE ]]; then
 	exit;
 fi
 
-OUTPUT_FILE=results/${FIT_VAR}.txt
+OUTPUT_FILE=log/binom_var_s0${1}.txt
 
-NUM_RUNS=100000
+NUM_RUNS=10000
 
-DIST="poisson"
+DIST="binom"
 
-FIT_ADV=0.05
+FIT_ADV=0
 
 
 for i in {0..99}
@@ -25,8 +25,8 @@ do
 	param=$(echo "scale=4;$C*$i" |bc)
 	FIT_VAR=$param
 	
-	BASE_FIT=$param
+	BASE_FIT=5
 
-	./sim.out $GRAPH_FILE $OUTPUT_FILE $NUM_RUNS $DIST $BASE_FIT $FIT_ADV $FIT_VAR >> poisson_variance_star.txt 
+	./sim.out $GRAPH_FILE $OUTPUT_FILE $NUM_RUNS $DIST $BASE_FIT $FIT_ADV $FIT_VAR 
 done
 

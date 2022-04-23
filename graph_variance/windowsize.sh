@@ -2,8 +2,11 @@
 
 C=0.05
 
-for i in {1..100}
+for i in {0..99}
 do
 	param=$(echo "scale=4;$C*$i" |bc)
-	./runsim.sh star 10000 "binom" 5 0 $param >> ./results/star_binom_var.txt
+	for j in {1..100}
+	do
+		./runsim.sh wellmixed 10000 "uniform" 5 0.1 $param >> ./wellmixed_uni_s01/${j}.txt
+	done
 done

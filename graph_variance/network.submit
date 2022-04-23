@@ -3,16 +3,15 @@ Executable = variance.sh
 Arguments = $(process)
 
 
-Error = log/osgJob.$(process).err
-Output = log/osgJob.$(process).out
-Log = log/osgJob.$(process).log
+Error = log/osgJob$(process).err
+Output = log/binom_var_s0$(process).out
+Log = log/osgJob$(process).log
 
 
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-Notification = never
-transfer_input_files=sim.out, graphs, results
-transfer_output_files = poisson_variance_star.txt
+transfer_input_files=sim.out, graphs
+transfer_output_files=log/binom_var_s0$(process).txt
 
 requirements = (HAS_FILE_usr_lib64_libgmp_so_3 == true)
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #echo -e "input format: graph_file | num_runs | fitness(float) | var in fitness ...\n"
-g++ -o sim.out -w Evograph.cpp
+g++ -std=c++11 -o sim.out -w Evograph.cpp
 
 ID=$1
 GRAPH_FILE=graphs/$ID.txt
