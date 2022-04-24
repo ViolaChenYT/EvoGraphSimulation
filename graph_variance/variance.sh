@@ -2,7 +2,7 @@
 
 C=0.05
 
-ID=wellmixed
+ID=star
 
 GRAPH_FILE=graphs/$ID.txt
 
@@ -11,14 +11,13 @@ if [[ ! -f $GRAPH_FILE ]]; then
 	exit;
 fi
 
-OUTPUT_FILE=log/binom_var_s0${1}.txt
+OUTPUT_FILE=star_s0/binom_var_s0${1}.txt
 
 NUM_RUNS=10000
 
-DIST="binom"
+DIST="uniform"
 
 FIT_ADV=0
-
 
 for i in {0..99}
 do
