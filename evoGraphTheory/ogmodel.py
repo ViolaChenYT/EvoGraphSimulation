@@ -12,7 +12,11 @@ N_ITER = 5000 # per trial
 n_keep = N_ITER
 MUTATION_RATE = 0.02
 
+<<<<<<< HEAD
+N_TRIALS = 100
+=======
 N_TRIALS = 10
+>>>>>>> cd9d8a987009dbd24ddf332cf05201e46e46f624
 
 MAPSIZE = 400
 # agent states
@@ -414,11 +418,18 @@ if __name__ == '__main__':
           G = (wellmixed)
           model = WELLMIXED
     else:
-      model=0
-      G=wellmixed
+        G = (wellmixed)
+        model = WELLMIXED
+    
+    model=0
+    G=wellmixed
     game = MyGame(model, G)
     if (len(sys.argv)) > 1:
       game.run_evo()
+<<<<<<< HEAD
+    else: game.run_trials()
+    
+=======
     else: 
       print("yeet")
       game.run_trials()
@@ -433,3 +444,4 @@ if __name__ == '__main__':
       plt.legend()
       plt.savefig("superimposed.jpg")
     
+>>>>>>> cd9d8a987009dbd24ddf332cf05201e46e46f624

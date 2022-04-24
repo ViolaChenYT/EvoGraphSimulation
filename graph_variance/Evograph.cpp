@@ -28,12 +28,10 @@ int main(int argc, char **argv)
     Simulator sim(argv[1], argv[2],fit);
     double s = atof(argv[6]);
     double var = atof(argv[7]);
-    cout << dist << "\t";
-    printf("%f\t%f\t%f\t",fit,var,s);
     
     sim.simulate(runs, s, var, dist = dist);
     sim.print();
-    //sim.save();
+    sim.save();
     
     
     /* for(int i = 4; i < argc; ++i) {

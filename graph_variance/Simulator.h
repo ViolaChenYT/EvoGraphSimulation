@@ -89,6 +89,7 @@ public:
 Simulator::Simulator(string input_name, string output_name, double fit) {
     this->fit = fit;
     ifstream input(input_name);
+    file.open(output_name);
     
     vector<int> out, in;
     int node1,node2;
@@ -144,6 +145,7 @@ Simulator::~Simulator()
     }
     delete [] edgelist;
     delete [] degrees;
+    file.close();
 }
 
 void Simulator::print_fit(double* fitness){
@@ -170,6 +172,11 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform")
     uniform_real_distribution<double> randsmall(-var, var);
     poisson_distribution<int> poi(fit);
     bernoulli_distribution rolldie(0.5);
+    
+    file << dist << "\t";
+    file << fit << "\t";
+    file << var << "\t";
+    file << s << "\t";
     
     int populations[] = { popsize - 1, 1 };
 
@@ -410,10 +417,12 @@ void Simulator::print(){
 // save results of the simulations to output file stream
 void Simulator::save()
 {
-    file << s << "\t";
+    double total = counts[0] + counts[1];
+    file << counts[1]/total << "\n";
+    /* file << s << "\t";
     file << var << "\t";
     file << counts[0] << "\t";
     file << counts[1] << "\t";
     file << times[0] << "\t";
-    file << times[1] << "\t";
+    file << times[1] << "\t"; */
 }
