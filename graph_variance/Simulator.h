@@ -172,12 +172,7 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform")
     uniform_real_distribution<double> randsmall(-var, var);
     poisson_distribution<int> poi(fit);
     bernoulli_distribution rolldie(0.5);
-    
-    file << dist << "\t";
-    file << fit << "\t";
-    file << var << "\t";
-    file << s << "\t";
-    
+
     int populations[] = { popsize - 1, 1 };
 
     int *mutant = new int[popsize];
@@ -283,6 +278,10 @@ void Simulator::simulate(int trials, double s = 0.0, double var = 0, string dist
     counts[1] = 0;
     times[0] = 0;
     times[1] = 0;
+    file << dist << "\t";
+    file << fit << "\t";
+    file << var << "\t";
+    file << s << "\t";
     for (int i = 0; i < trials; ++i)
     {
         if (i % 20 == 0) {
