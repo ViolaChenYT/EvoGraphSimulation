@@ -278,6 +278,7 @@ void Simulator::simulate(int trials, double s = 0.0, double var = 0, string dist
     counts[1] = 0;
     times[0] = 0;
     times[1] = 0;
+    cout << dist << "\t";
     file << dist << "\t";
     file << fit << "\t";
     file << var << "\t";
