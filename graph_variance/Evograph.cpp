@@ -27,12 +27,13 @@ int main(int argc, char **argv)
     double fit = atof(argv[5]);
     Simulator sim(argv[1], argv[2],fit);
     double s = atof(argv[6]);
-    double var = atof(argv[7]);
-    
-    sim.simulate(runs, s, var, dist = dist);
-    sim.print();
-    sim.save();
-    
+        
+    for(int i = 7; i < argc; ++i) {
+	    double var = atof(argv[i]);
+	    sim.simulate(runs, s, var, dist=dist);
+	    // sim.print();
+	    sim.save();
+    }
     
     /* for(int i = 4; i < argc; ++i) {
         double fitness = atof(argv[i]);

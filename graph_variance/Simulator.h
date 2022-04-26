@@ -281,8 +281,11 @@ void Simulator::simulate(int trials, double s = 0.0, double var = 0, string dist
     cout << dist << "\t";
     file << dist << "\t";
     file << fit << "\t";
+    cout << fit << "\t";
     file << var << "\t";
+    cout << var << "\t";
     file << s << "\t";
+    cout << s << "\t";
     for (int i = 0; i < trials; ++i)
     {
         if (i % 20 == 0) {

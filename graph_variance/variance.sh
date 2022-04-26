@@ -4,7 +4,7 @@ C=0.05
 
 ID=star
 
-GRAPH_FILE=graphs/$ID.txt
+GRAPH_FILE=graphs/${ID}.txt
 
 if [[ ! -f $GRAPH_FILE ]]; then
 	echo -e "graph file not found"
@@ -17,7 +17,7 @@ NUM_RUNS=10000
 
 DIST="uniform"
 
-FIT_ADV=0.5
+FIT_ADV=0.05
 
 for i in {0..99}
 do
