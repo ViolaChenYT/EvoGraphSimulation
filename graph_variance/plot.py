@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
 
 def plot_window():
   data = pd.read_csv('./results/window1.txt',sep='\t',header=None)
@@ -47,7 +48,53 @@ def uniform_binom_var():
   plt.legend()
   plt.show()
 
+def aggregate(dirname):
+  count = np.zeros((500,))
+  matrix_list = []
+  for i in range(1,501):
+    filename = dirname + f'{i}.txt'
+    data = pd.read_csv(filename, sep='\t', header=None)
+    data.index = data.iloc[:,2]
+    matrix_list.append(data)
+    # print(data)
+  cmb = pd.concat(matrix_list).groupby(level=0).sum()
+  # print(cmb.iloc[:,0].to_string())
+  # print(cmb)
+  ans = pd.DataFrame()
+  ans.index = cmb.index
+  freq = cmb.iloc[:,0] // 5
+  ans['pfix'] = cmb.iloc[:,3] / freq
+  print(ans)
+  return ans
+
+def filter():
+  dirname = "star_uni_s0"
+  for filename in os.listdir(dirname):
+    f = os.path.join(dirname, filename)
+    print(f)
+    data = pd.read_csv(f, sep='\t', header=None)
+    if data.iloc[0,0] != 'uniform' or data.iloc[0,3] != 0:
+      os.rename(f, dirname+'wrong'+filename)
+    
+def cmp():
+  df = aggregate('star_uni_s0/')
+  plt.plot(df.index, df.iloc[:,0], label='uniform, s=0')
+  df1 = aggregate('star_binom_s0/')
+  plt.plot(df1.index, df1.iloc[:,0], label='binom, s=0')
+  df = aggregate('star_uni_s005/')
+  plt.plot(df.index, df.iloc[:,0], label='uniform, s=0.05')
+  df1 = aggregate('star_binom_s005/')
+  plt.plot(df1.index, df1.iloc[:,0], label='binom, s=0.05')
+  df = aggregate('star_uni_s01/')
+  plt.plot(df.index, df.iloc[:,0], label='uniform, s=0.1')
+  df1 = aggregate('star_binom_s01/')
+  plt.plot(df1.index, df1.iloc[:,0], label='binom, s=0.1')
+  plt.legend()
+  plt.show()
+
 if __name__ == '__main__':
   # plot_wellmixed()
   # uniform_binom_var()
-  plot_poi()
+  # plot_poi()
+  # cmp()
+  filter()
