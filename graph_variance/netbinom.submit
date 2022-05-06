@@ -10,7 +10,7 @@ Log = log/osgJob$(process).log
 
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-transfer_input_files=sim.out, graphs,param.in, star_binom_s01
-transfer_output_files=star_binom_s01
+transfer_input_files=sim.out, graphs,param.in, wellmixed_binom_sneg
+transfer_output_files=wellmixed_binom_sneg
 
 Queue 500

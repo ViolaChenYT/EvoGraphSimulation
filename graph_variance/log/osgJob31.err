@@ -1,0 +1,7 @@
+INFO  Discarding path '/hadoop'. File does not exist
+INFO  Discarding path '/ceph'. File does not exist
+INFO  Discarding path '/hdfs'. File does not exist
+INFO  Discarding path '/lizard'. File does not exist
+INFO  Discarding path '/mnt/hadoop'. File does not exist
+INFO  Discarding path '/mnt/hdfs'. File does not exist
+INFO  Discarding path '/cvmfs'. File does not exist
