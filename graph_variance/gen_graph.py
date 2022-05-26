@@ -21,7 +21,7 @@ if __name__ == '__main__':
         for j in range(i+1, n_nodes):
           g.add_edge(i,j)
     elif graph_type == 'reg':
-	g = random_regular_graph(3, n_nodes)
+      g = nx.random_regular_graph(3, n_nodes)
     else:
       # gen random graph
       g = nx.generators.random_graphs.erdos_renyi_graph(n_nodes, 0.1)

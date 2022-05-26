@@ -2,10 +2,10 @@
 
 i=$1
 i=$((i+1))
-x=$(sed "${i}q;d" star_param.in | awk '{print $1}')
+x=$(sed "${i}q;d" reg_param.in | awk '{print $1}')
 # y=$(sed "${i}q;d" param.in | awk '{print $2}')
 
-model=star
+model=3reg
 dist=binom
 
 # original: 20000 runs
