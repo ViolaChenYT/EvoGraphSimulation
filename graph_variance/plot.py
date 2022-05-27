@@ -1,7 +1,7 @@
 import numpy as np
+import sys
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 import os
 
 def plot_window():
@@ -181,6 +181,99 @@ def one_model(model='wellmixed',dist='uniform'):
   plt.ylabel('Probability of fixation')
   plt.show()
 
+def collect(dirname):
+  s0_list = []
+  s005_list = []
+  s01_list = []
+  s02_list = []
+  cnt = 0
+  for filename in os.listdir(dirname):
+    # print(filename, flush=True)
+    f = os.path.join(dirname, filename)
+    data = pd.read_csv(f, sep='\t', header=None)
+    index = data.iloc[:10,2]
+    mat_s0 = data.iloc[:10,4]
+    mat_s0.index = index
+    s0_list.append(mat_s0)
+    mat_s005 = data.iloc[10:20,4]
+    mat_s005.index = index
+    s005_list.append(mat_s005)
+    mat_s01 = data.iloc[20:30,4]
+    mat_s01.index = index
+    s01_list.append(mat_s01)
+    mat_s02 = data.iloc[30:40,4]
+    mat_s02.index = index
+    s02_list.append(mat_s02)
+    cnt = cnt + 1
+  cmb1 = pd.concat(s0_list).groupby(level=0).sum()/cnt
+  cmb2 = pd.concat(s005_list).groupby(level=0).sum()/cnt
+  cmb3 = pd.concat(s01_list).groupby(level=0).sum()/cnt
+  cmb4 = pd.concat(s02_list).groupby(level=0).sum()/cnt
+  return cmb1,cmb2,cmb3,cmb4
+
+def scollect(dirname):
+  s0_list = []
+  s005_list = []
+  s01_list = []
+  s02_list = []
+  cnt = 0
+  for filename in os.listdir(dirname):
+    f = os.path.join(dirname, filename)
+    data = pd.read_csv(f, sep='\t', header=None)
+    index = data.iloc[:11,2]
+    mat_s0 = data.iloc[:11,4]
+    mat_s0.index = index
+    s0_list.append(mat_s0)
+    mat_s005 = data.iloc[11:22,4]
+    mat_s005.index = index
+    s005_list.append(mat_s005)
+    mat_s01 = data.iloc[22:33,4]
+    mat_s01.index = index
+    s01_list.append(mat_s01)
+    mat_s02 = data.iloc[33:44,4]
+    mat_s02.index = index
+    s02_list.append(mat_s02)
+    cnt = cnt + 1
+  cmb1 = pd.concat(s0_list).groupby(level=0).sum()/cnt
+  cmb2 = pd.concat(s005_list).groupby(level=0).sum()/cnt
+  cmb3 = pd.concat(s01_list).groupby(level=0).sum()/cnt
+  cmb4 = pd.concat(s02_list).groupby(level=0).sum()/cnt
+  return cmb1,cmb2,cmb3,cmb4
+
+def plot_mean1(dirname):
+  m1,m2,m3,m4 = collect(dirname)
+  s1,s2,s3,s4 = scollect('std_' + dirname)
+  plt.scatter(m1.index**2, m1, label='s=0')
+  plt.scatter(m2.index**2, m2, label='s=0.05')
+  plt.scatter(m3.index**2, m3, label='s=0.1')
+  plt.scatter(m4.index**2, m4, label='s=0.2')
+  plt.scatter(s1.index**2, s1, label='standard s=0')
+  plt.scatter(s2.index**2, s2, label='standard s=0.05')
+  plt.scatter(s3.index**2, s3, label='standard s=0.1')
+  plt.scatter(s4.index**2, s4, label='standard s=0.2')
+  plt.legend()
+  plt.xlabel('variance')
+  plt.ylabel('Probability of fixation')
+  plt.show()
+
+def cmp_mean1():
+  # m1,m2,m3,m4 = collect('star')
+  s1,s2,s3,s4 = scollect('std_' + 'star')
+  plt.plot(s1.index**2, s1, label='star s=0')
+  plt.plot(s2.index**2, s2, label='star s=0.05')
+  plt.plot(s3.index**2, s3, label='star s=0.1')
+  plt.plot(s4.index**2, s4, label='star s=0.2')
+  s1,s2,s3,s4 = scollect('std_' + 'wellmixed')
+  plt.plot(s1.index**2, s1, label='wellmixed s=0')
+  plt.plot(s2.index**2, s2, label='wellmixed s=0.05')
+  plt.plot(s3.index**2, s3, label='wellmixed s=0.1')
+  plt.plot(s4.index**2, s4, label='wellmixed s=0.2')
+  plt.legend()
+  plt.xlabel('variance')
+  plt.ylabel('Probability of fixation')
+  plt.show()
+
+
 if __name__ == '__main__':
   # plot_wellmixed()
   # uniform_binom_var()
@@ -188,5 +281,7 @@ if __name__ == '__main__':
   # cmp()
   # aggr('star_uni_s0')
   # star()
-  cmp()
+  # cmp()
   # one_model('star','uni')
+  plot_mean1(sys.argv[1])
+  # cmp_mean1()

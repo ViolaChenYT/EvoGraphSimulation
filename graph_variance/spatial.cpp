@@ -1,12 +1,11 @@
 //  Evograph
 //
-//  Created by Yang Ping Kuo on 5/22/19.
-//  Copyright © 2019 Yang Ping Kuo. All rights reserved.
+//  adapted from YP's code
 //
 #pragma once
 
 #include <iostream>
-#include "temporal.h"
+#include "spatial.h"
 #include <random>
 #include <fstream>
 #include <string>
