@@ -422,6 +422,7 @@ void Simulator::save()
 {
     double total = counts[0] + counts[1];
     file << counts[1]/total << endl;
+    cout << counts[1]/total << endl;
     /* file << s << "\t";
     file << var << "\t";
     file << counts[0] << "\t";

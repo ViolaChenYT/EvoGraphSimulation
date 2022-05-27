@@ -6,7 +6,7 @@
 #pragma once
 
 #include <iostream>
-#include "Simulator.h"
+#include "temporal.h"
 #include <random>
 #include <fstream>
 #include <string>
@@ -31,7 +31,7 @@ int main(int argc, char **argv)
         for(int j = 10; j < argc; j++) {
             double var = atof(argv[j]);
             sim.simulate(runs, s, var, dist=dist);
-            // sim.print();
+            sim.print();
             sim.save();
         }
     }

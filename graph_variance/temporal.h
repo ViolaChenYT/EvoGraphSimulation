@@ -199,8 +199,11 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform")
         }
     }
     int index2 = (int)(rand(generator) * popsize);
-    fitness[index2] = mut_fit[index2]; 
+    
+    fitness[index2] = mut_fit[index2];
+    mutant[index2] = 1;
     int t = 0;
+
     // population[0]: no. of WT, pop[1]: no. of mut
     while (populations[0] != 0 && populations[1] != 0){
         ++t;
@@ -252,6 +255,9 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform")
         times[0] += t;
     }
     delete[] mutant;
+    delete[] fitness;
+    delete[] mut_fit;
+    delete[] acc_fit;
 }
 // simulate birth-death processes for input trial number of times
 void Simulator::simulate(int trials, double s = 0.0, double var = 0, string dist = "uniform")
