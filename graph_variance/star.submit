@@ -13,4 +13,4 @@ when_to_transfer_output = ON_EXIT
 transfer_input_files=sim.out, graphs, star_param.in, star
 transfer_output_files=star
 
-Queue 1000
+Queue 5000
