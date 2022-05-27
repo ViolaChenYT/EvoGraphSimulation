@@ -202,7 +202,6 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform")
         }
         fitness[index2] = fit + s + offset; 
     }
-    cout << "fitness" << fitness[index2] << endl;
     int t = 0;
     // population[0]: no. of WT, pop[1]: no. of mut
     while (populations[0] != 0 && populations[1] != 0){
@@ -218,7 +217,6 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform")
         double birth = totalFitness * rand(generator);
         int birthIndex, birthNode, deathIndex, deathNode;
         // bin search to find birth node
-        cout << "freq " << populations[1]/popsize << endl;
         birthNode = binsearch(acc_fit,0,popsize-1,birth);
         //printf("birthnode, %d -- %.2f\n", birthNode, birth);
         if (birthNode == -1){

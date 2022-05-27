@@ -1,8 +1,7 @@
 #!/bin/bash
 model=$1
-dirname=$2
 echo "" > ${model}_param.in
-for i in {1..500}
+for i in {1..5000}
 do
-	echo "mean1/${dirname}/${i}.txt" >> ${model}_param.in
+	echo "${model}/${i}.txt" >> ${model}_param.in
 done
