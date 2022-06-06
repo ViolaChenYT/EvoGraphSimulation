@@ -273,6 +273,70 @@ def cmp_mean1():
   plt.ylabel('Probability of fixation')
   plt.show()
 
+def get_param_graph_label(i):
+  if i < 0:
+    print("error in index")
+    return
+  if i < 100:
+    return "ER p = 0.03"
+  elif i < 200:
+    return "PA m = 3"
+  elif i < 300:
+    return "PA m = 5"
+  elif i < 400:
+    return "PA m = 7"
+  elif i < 450:
+    return "Bi"
+  elif i < 460:
+    return "SW m = 4, p = 0.01"
+  elif i < 470:
+    return "SW m = 4, p = 0.05"
+  elif i < 480:
+    return "SW m = 4, p = 0.1"
+  elif i < 490:
+    return "SW m = 4, p = 0.2"
+  elif i < 500:
+    return "SW m = 4, p = 0.5"
+  elif i < 510:
+    return "SW m = 4, p = 0.8"
+  elif i < 600:
+    return "detour"
+  elif i < 700:
+    return "star"
+  elif i < 750:
+    return "rgg r= 0.3"
+  else: return "rgg r= 0.5"
+  
+def plot_graphs(dirname):
+  groups = np.vectorize(get_param_graph_label)(np.arange(0,800))
+  count = np.full((800, ), 0, dtype=int)
+  pfix0 = np.zeros((800,))
+  pfixmax = np.zeros((800,))
+  for filename in os.listdir(dirname):
+    id = int(filename.split(".")[0]) % 800
+    f = os.path.join(dirname, filename)
+    if os.stat(f).st_size == 0:
+      continue
+    data = pd.read_csv(f, sep='\t', header=None)
+    pfix0[id],pfixmax[id] = (data.iloc[0,4],data.iloc[1,4])
+    count[id] += 1
+  dirname = dirname+"1"
+  for filename in os.listdir(dirname):
+    id = int(filename.split(".")[0]) % 800
+    f = os.path.join(dirname, filename)
+    if os.stat(f).st_size == 0:
+      continue
+    data = pd.read_csv(f, sep='\t', header=None)
+    pfix0[id],pfixmax[id] = (data.iloc[0,4],data.iloc[1,4])
+    count[id] += 1
+  xs = np.divide(pfix0, count)
+  ys = np.divide(pfixmax, count)
+  fig, ax = plt.subplots()
+  for g in np.unique(groups):
+      ix = np.where(groups == g)
+      ax.scatter(xs[ix], ys[ix], label = g)
+  ax.legend()
+  plt.show()
 
 if __name__ == '__main__':
   # plot_wellmixed()
@@ -283,5 +347,6 @@ if __name__ == '__main__':
   # star()
   # cmp()
   # one_model('star','uni')
-  plot_mean1(sys.argv[1])
+  # plot_mean1(sys.argv[1])
   # cmp_mean1()
+  plot_graphs("graph_result")
