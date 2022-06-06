@@ -287,18 +287,8 @@ def get_param_graph_label(i):
     return "PA m = 7"
   elif i < 450:
     return "Bi"
-  elif i < 460:
-    return "SW m = 4, p = 0.01"
-  elif i < 470:
-    return "SW m = 4, p = 0.05"
-  elif i < 480:
-    return "SW m = 4, p = 0.1"
-  elif i < 490:
-    return "SW m = 4, p = 0.2"
-  elif i < 500:
-    return "SW m = 4, p = 0.5"
   elif i < 510:
-    return "SW m = 4, p = 0.8"
+    return "SW m = 4"
   elif i < 600:
     return "detour"
   elif i < 700:
@@ -318,7 +308,8 @@ def plot_graphs(dirname):
     if os.stat(f).st_size == 0:
       continue
     data = pd.read_csv(f, sep='\t', header=None)
-    pfix0[id],pfixmax[id] = (data.iloc[0,4],data.iloc[1,4])
+    pfix0[id] += data.iloc[0,4]
+    pfixmax[id] += data.iloc[1,4]
     count[id] += 1
   dirname = dirname+"1"
   for filename in os.listdir(dirname):
@@ -327,7 +318,8 @@ def plot_graphs(dirname):
     if os.stat(f).st_size == 0:
       continue
     data = pd.read_csv(f, sep='\t', header=None)
-    pfix0[id],pfixmax[id] = (data.iloc[0,4],data.iloc[1,4])
+    pfix0[id] += data.iloc[0,4]
+    pfixmax[id] += data.iloc[1,4]
     count[id] += 1
   xs = np.divide(pfix0, count)
   ys = np.divide(pfixmax, count)
