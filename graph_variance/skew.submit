@@ -1,5 +1,5 @@
 Universe = vanilla
-Executable = graph.sh
+Executable = skew.sh
 Arguments = $(process)
 
 
@@ -13,4 +13,4 @@ when_to_transfer_output = ON_EXIT
 transfer_input_files=skew.out, wheel.txt, skew_param.in, skew_result,graphs
 transfer_output_files=skew_result
 
-Queue 100
+Queue 300
