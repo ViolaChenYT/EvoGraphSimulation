@@ -1,6 +1,7 @@
 #!/bin/bash
 model=$1
 echo "" > ${model}_param.in
+if [[ "$1" == "graph_all" ]]; then
 for i in {1..7350}
 do
 	res=$((i-1))
@@ -40,5 +41,10 @@ do
 		id=$((res-6550))
 		echo "graphs/isl3_graphs/$id.txt   graphall_result/isl3/${id}.txt" >> ${model}_param.in
 	fi
+done
+fi
+for i in {1..100}
+do
+	echo "wheel.txt   wheel_result/$((i-1))" >> ${model}_param.in
 done
 # echo "${model}/${i}.txt" >> ${model}_param.in
