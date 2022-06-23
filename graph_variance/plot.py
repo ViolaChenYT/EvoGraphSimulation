@@ -297,7 +297,8 @@ def get_param_graph_label(i):
     return "rgg r= 0.3"
   else: return "rgg r= 0.5"
   
-def plot_graphs(dirname):
+def plot_graphs():
+  dirname = "graph_result"
   groups = np.vectorize(get_param_graph_label)(np.arange(0,800))
   count = np.full((800, ), 0, dtype=int)
   pfix0 = np.zeros((800,))
@@ -326,7 +327,24 @@ def plot_graphs(dirname):
   fig, ax = plt.subplots()
   for g in np.unique(groups):
       ix = np.where(groups == g)
-      ax.scatter(xs[ix], ys[ix], label = g)
+      ax.scatter(xs[ix], ys[ix], label = g,s=1)
+  lst = ["20_3","assort","complex","fam","isl0","isl1","isl2","isl3","mv","pa","regx4"]
+  dirname = "graphall_result"
+  for graphtype in lst:
+    name = os.path.join(dirname,graphtype)
+    n = len(os.listdir(name))
+    xs = []
+    ys = []
+    for filename in os.listdir(name):
+      f = os.path.join(name,filename)
+      id = int(filename.split(".")[0])
+      if os.stat(f).st_size == 0:
+        continue
+      data = pd.read_csv(f, sep='\t', header=None)
+      xs.append(data.iloc[0,4])
+      ys.append(data.iloc[1,4])
+    print(graphtype)
+    ax.scatter(xs,ys,label=graphtype,s=3)
   ax.legend()
   plt.show()
 
@@ -341,4 +359,4 @@ if __name__ == '__main__':
   # one_model('star','uni')
   # plot_mean1(sys.argv[1])
   # cmp_mean1()
-  plot_graphs("graph_result")
+  plot_graphs()

@@ -43,8 +43,24 @@ do
 	fi
 done
 fi
-for i in {1..100}
-do
-	echo "wheel.txt   wheel_result/$((i-1))" >> ${model}_param.in
-done
+if [[ "$model" == "wheel"]]; then
+	for i in {1..100}
+	do
+		echo "wheel.txt   wheel_result/$((i-1))" >> ${model}_param.in
+	done
+fi
+if [[ "$model" == "skew"]]; then
+	for i in {1..100}
+	do 
+		echo "graphs/wellmixed.txt   skew_result/$((i-1))" >> ${model}_param.in
+	done 
+	for i in {101..200}
+	do 
+		echo "graphs/3reg.txt   skew_result/$((i-1))" >> ${model}_param.in
+	done
+	for i in {201..300}
+	do 
+		echo "wheel.txt   skew_result/$((i-1))" >> ${model}_param.in
+	done
+fi
 # echo "${model}/${i}.txt" >> ${model}_param.in

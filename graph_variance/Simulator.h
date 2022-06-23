@@ -202,6 +202,39 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform")
         }
         fitness[index2] = fit + s + offset; 
     }
+    else if (dist == "left"){
+        double offset;
+        double u = rand(generator);
+        if (u < 0.5){
+            offset = -0.5;
+        } else if (u > 0.75) {
+            offset = 1;
+        } else {
+            offset = 0;
+        }
+        fitness[index2] = fit + s + offset;
+    } 
+    else if (dist == "mid"){
+        double offset;
+        if (rolldie(generator)){
+            offset = 0.5;
+        } else{
+            offset = -0.5;
+        }
+        fitness[index2] = fit + s + offset; 
+    }
+    else if (dist == "right"){
+        double offset;
+        double u = rand(generator);
+        if (u < 0.25){
+            offset = -1;
+        } else if (u > 0.5) {
+            offset = 0.5;
+        } else {
+            offset = 0;
+        }
+        fitness[index2] = fit + s + offset;
+    }
     int t = 0;
     // population[0]: no. of WT, pop[1]: no. of mut
     while (populations[0] != 0 && populations[1] != 0){
@@ -252,6 +285,39 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform")
                     offset = -var;
                 }
                 fitness[deathNode] = fit + s + offset; 
+            }
+             else if (dist == "left"){
+                double offset;
+                double u = rand(generator);
+                if (u < 0.5){
+                    offset = -0.5;
+                } else if (u > 0.75) {
+                    offset = 1;
+                } else {
+                    offset = 0;
+                }
+                fitness[index2] = fit + s + offset;
+            } 
+            else if (dist == "mid"){
+                double offset;
+                if (rolldie(generator)){
+                    offset = 0.5;
+                } else{
+                    offset = -0.5;
+                }
+                fitness[index2] = fit + s + offset; 
+            }
+            else if (dist == "right"){
+                double offset;
+                double u = rand(generator);
+                if (u < 0.25){
+                    offset = -1;
+                } else if (u > 0.5) {
+                    offset = 0.5;
+                } else {
+                    offset = 0;
+                }
+                fitness[index2] = fit + s + offset;
             }
         }
     }
