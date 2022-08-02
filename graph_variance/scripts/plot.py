@@ -279,12 +279,14 @@ def get_param_graph_label(i):
     return
   if i < 100:
     return "ER p = 0.03"
-  elif i < 200:
-    return "PA m = 3"
-  elif i < 300:
-    return "PA m = 5"
+  # elif i < 200:
+  #   return "PA m = 3"
+  # elif i < 300:
+  #   return "PA m = 5"
+  # elif i < 400:
+  #   return "PA m = 7"
   elif i < 400:
-    return "PA m = 7"
+    return "PA"
   elif i < 450:
     return "Bi"
   elif i < 510:
@@ -293,9 +295,11 @@ def get_param_graph_label(i):
     return "detour"
   elif i < 700:
     return "star"
-  elif i < 750:
-    return "rgg r= 0.3"
-  else: return "rgg r= 0.5"
+  else:
+    return "rgg"
+  # elif i < 750:
+  #   return "rgg r= 0.3"
+  # else: return "rgg r= 0.5"
   
 def plot_graphs():
   dirname = "graph_result"
@@ -324,10 +328,12 @@ def plot_graphs():
     count[id] += 1
   xs = np.divide(pfix0, count)
   ys = np.divide(pfixmax, count)
+  np.save("pfix0.npy",xs)
+  np.save("pfixmax.npy",ys)
   fig, ax = plt.subplots()
   for g in np.unique(groups):
       ix = np.where(groups == g)
-      ax.scatter(xs[ix], ys[ix], label = g,s=1)
+      ax.scatter(xs[ix], ys[ix], label = g,s=3)
   lst = ["20_3","assort","complex","fam","isl0","isl1","isl2","isl3","mv","pa","regx4"]
   dirname = "graphall_result"
   for graphtype in lst:
@@ -345,9 +351,163 @@ def plot_graphs():
       ys.append(data.iloc[1,4])
     print(graphtype)
     ax.scatter(xs,ys,label=graphtype,s=3)
+  dirname="wheel_result"
+  pfix0 = np.zeros((100,))
+  pfixmax = np.zeros((100,))
+  for filename in os.listdir(dirname):
+    id = int(filename)
+    f = os.path.join(dirname, filename)
+    if os.stat(f).st_size == 0:
+      continue
+    data = pd.read_csv(f, sep='\t', header=None)
+    pfix0[id] = data.iloc[0,4]
+    pfixmax[id] = data.iloc[1,4]
+  plt.scatter(pfix0,pfixmax,label="wheel",s=3)
   ax.legend()
   plt.show()
 
+def plot_wheel():
+  dirname="../wheel_result"
+  pfix0 = np.zeros((100,))
+  pfixmax = np.zeros((100,))
+  for filename in os.listdir(dirname):
+    id = int(filename)
+    f = os.path.join(dirname, filename)
+    if os.stat(f).st_size == 0:
+      continue
+    data = pd.read_csv(f, sep='\t', header=None)
+    pfix0[id] = data.iloc[0,4]
+    pfixmax[id] = data.iloc[1,4]
+  plt.scatter(pfix0,pfixmax,label="wheel",s=3)
+  plt.legend()
+  plt.show()
+  
+def plot_some_graphs():
+  dirname = "../graph_result"
+  groups = np.vectorize(get_param_graph_label)(np.arange(0,800))
+  count = np.full((800, ), 0, dtype=int)
+  pfix0 = np.zeros((800,))
+  pfixmax = np.zeros((800,))
+  for filename in os.listdir(dirname):
+    id = int(filename.split(".")[0]) % 800
+    f = os.path.join(dirname, filename)
+    if os.stat(f).st_size == 0:
+      continue
+    data = pd.read_csv(f, sep='\t', header=None)
+    pfix0[id] += data.iloc[0,4]
+    pfixmax[id] += data.iloc[1,4]
+    count[id] += 1
+  dirname = dirname+"1"
+  for filename in os.listdir(dirname):
+    id = int(filename.split(".")[0]) % 800
+    f = os.path.join(dirname, filename)
+    if os.stat(f).st_size == 0:
+      continue
+    data = pd.read_csv(f, sep='\t', header=None)
+    pfix0[id] += data.iloc[0,4]
+    pfixmax[id] += data.iloc[1,4]
+    count[id] += 1
+  xs = np.divide(pfix0, count)
+  ys = np.divide(pfixmax, count)
+  np.save("pfix0.npy",xs)
+  np.save("pfixmax.npy",ys)
+  fig, ax = plt.subplots()
+  for g in np.unique(groups):
+      ix = np.where(groups == g)
+      ax.scatter(xs[ix], ys[ix], label = g,s=5)
+  lst = ["isl0","isl1","isl2","isl3"]
+  dirname = "../graphall_result/"
+  for graphtype in lst:
+    name = os.path.join(dirname,graphtype)
+    n = len(os.listdir(name))
+    xs = []
+    ys = []
+    for filename in os.listdir(name):
+      f = os.path.join(name,filename)
+      id = int(filename.split(".")[0])
+      if os.stat(f).st_size == 0:
+        continue
+      data = pd.read_csv(f, sep='\t', header=None)
+      xs.append(data.iloc[0,4])
+      ys.append(data.iloc[1,4])
+    print(graphtype)
+    ax.scatter(xs,ys,label=graphtype,s=5)
+  dirname="../wheel_result/"
+  pfix0 = np.zeros((100,))
+  pfixmax = np.zeros((100,))
+  for filename in os.listdir(dirname):
+    id = int(filename)
+    f = os.path.join(dirname, filename)
+    if os.stat(f).st_size == 0:
+      continue
+    data = pd.read_csv(f, sep='\t', header=None)
+    pfix0[id] = data.iloc[0,4]
+    pfixmax[id] = data.iloc[1,4]
+  plt.scatter(pfix0,pfixmax,label="wheel",s=5)
+  ax.legend()
+  plt.show()
+  
+def plot_skew_concept():
+  x = [0.1, 0.6, 1.1, 1.6, 2.1]
+  left = [0.25, 0, 0.25, 0.5,0]
+  plt.bar(x,left, width = 0.3, tick_label=x)
+  plt.gca().set(title="left skew, wildtype fitness 1", xlabel="mutant fitness",ylabel="probability")
+  plt.savefig("left skew")
+  plt.clf()
+  right = [0, 0.5, 0.25, 0, 0.25]
+  plt.bar(x,right, width=0.3,tick_label=x)
+  plt.gca().set(title="right skew, wildtype fitness 1", xlabel="mutant fitness",ylabel="probability")
+  plt.savefig("right skew")
+  plt.clf()
+  mid = [0, 0.5, 0, 0.5, 0]
+  plt.bar(x,mid, width=0.3,tick_label=x)
+  plt.gca().set(title="no skew, wildtype fitness 1", xlabel="mutant fitness",ylabel="probability")
+  plt.savefig("no skew")
+  
+def plot_skew():
+  dirname = "skew_result"
+  left = [[],[],[]]
+  mid = [[],[],[]]
+  right = [[],[],[]]
+  count = [0,0,0]
+  for filename in os.listdir(dirname):
+    f = os.path.join(dirname, filename)
+    id = int(filename.split(".")[0])
+    if os.stat(f).st_size == 0:
+      continue
+    data = pd.read_csv(f, sep='\t', header=None)
+    # print(data)
+    if id < 100:
+      right[0].append(data.iloc[0,4])
+      mid[0].append(data.iloc[1,4])
+      left[0].append(data.iloc[2,4])
+      count[0]+=1
+    elif id < 200:
+      right[1].append(data.iloc[0,4])
+      mid[1].append(data.iloc[1,4])
+      left[1].append(data.iloc[2,4])
+      count[1]+=1
+    else:
+      right[2].append(data.iloc[0,4])
+      mid[2].append(data.iloc[1,4])
+      left[2].append(data.iloc[2,4])
+      count[2]+=1
+  left = np.array(left) / count
+  mid = np.array(mid) / count
+  right = np.array(right) / count
+
+  mean_l, mean_m, mean_r = np.mean(left), np.mean(mid),np.mean(right)
+  print(mean_l, mean_m, mean_r)
+  std_l,std_m,std_r = np.std(left), np.std(mid),np.std(right)
+  
+  fig, ax = plt.subplots()
+  ax.bar(np.arange(3), [mean_l, mean_m, mean_r], yerr=[std_l,std_m,std_r], align='center', alpha=0.5, ecolor='black', capsize=10)
+  ax.set_xticks(np.arange(3))
+  ax.set_xticklabels(["left skew", "no skew", "right skew"])
+  ax.set_title('pfix of different skew, mean 1, sigma2 = 0.25, s=0.1')
+  
+  plt.show()
+  
 if __name__ == '__main__':
   # plot_wellmixed()
   # uniform_binom_var()
@@ -359,4 +519,9 @@ if __name__ == '__main__':
   # one_model('star','uni')
   # plot_mean1(sys.argv[1])
   # cmp_mean1()
-  plot_graphs()
+  
+  # plot_some_graphs()
+  plot_wheel()
+  # plot_skew_concept()
+  # plot_skew()
+  

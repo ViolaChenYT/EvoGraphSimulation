@@ -1,7 +1,9 @@
 import sys
 import networkx as nx
 
-if __name__ == '__main__':
+N = 100
+
+def gen_basics():
   if len(sys.argv) < 4:
     print("please key in name, n_nodes, graph_type")
     raise Exception("InvalidInput")
@@ -26,3 +28,23 @@ if __name__ == '__main__':
       # gen random graph
       g = nx.generators.random_graphs.erdos_renyi_graph(n_nodes, 0.1)
     nx.write_edgelist(g, f"./graphs/{name}.txt", data=False)
+    
+def gen_wheel_reg(n=100):
+  output_dir = sys.argv[1]
+  for i in range(n):
+    g = nx.Graph()
+  
+    nx.write_edgelist(g,f"./{output}/{i}.txt")
+  print("Done!")
+
+def gen_tree_like():
+  output_dir = sys.argv[1]
+  for i in range(n):
+    g = nx.Graph()
+  
+    nx.write_edgelist(g,f"./{output}/{i}.txt")
+  print("Done!")
+
+if __name__ == '__main__':
+  # gen_myisland()
+  gen_tree_like()
