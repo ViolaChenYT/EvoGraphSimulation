@@ -45,6 +45,8 @@ def gen_tree_like():
     nx.write_edgelist(g,f"./{output}/{i}.txt")
   print("Done!")
 
+
+
 if __name__ == '__main__':
   # gen_myisland()
   gen_tree_like()

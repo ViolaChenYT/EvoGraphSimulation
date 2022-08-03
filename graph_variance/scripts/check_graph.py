@@ -12,7 +12,6 @@ class Graph:
     for line in edges:
       (a,b) = line.split()
       self.G.add_edge(a,b)
-      self.G.add_edge(b,a)
     f.close()
   
   def compute_amplification(self):
@@ -22,12 +21,12 @@ class Graph:
     degrees = pd.DataFrame(degrees,columns=["index", "degree"],dtype=int)
     degrees.sort_values(by="index",inplace=True)
     degrees.index = degrees["index"]
-    print(degrees)
+    # print(degrees)
     max_d = np.max(degrees["degree"])
-    print(max_d)
+    # print(max_d)
     p_i = np.array([len(degrees[degrees["degree"]==i]["degree"]) for i in range(max_d + 1)]) / len(self.G.nodes)
     print(p_i)
-    return alpha
+    # return alpha
   
   def compute_mixing_pattern(self):
     '''compute the assortativity coefficient of a grpah
@@ -40,6 +39,27 @@ class Graph:
   def show(self):
     nx.draw_networkx(self.G)
     plt.show()
+  
+  def remove_a_bridge(self):
+    # print(nx.degree(self.G))
+    degrees = list((np.array(nx.degree(self.G)).astype(int))[:,1])
+    max_d = max(degrees)
+    min_d = min(degrees)
+    # print(degrees, max_d,min_d)
+    # print(self.G.edges())
+    for (u,v) in self.G.edges():
+      u,v = int(u),int(v)
+      if (degrees[u] == min_d+1 and degrees[v] > min_d) or \
+          (degrees[v] == min_d+1 and degrees[u] > min_d):
+        self.G.remove_edge(str(u), str(v))
+        degrees = list((np.array(nx.degree(self.G)).astype(int))[:,1])
+        # print(degrees)
+        return
+    print("Failed to remove edge")
+    return
+   
+  def writetofile(self, output):
+    nx.write_edgelist(self.G, output, data=False)
    
 def plot_density(dirname):
   densities = []
@@ -93,8 +113,6 @@ def plot_island(f=2):
     raise Exception("Invalid graph family")
   dirname = f"../graphs/isl{f}_graphs/"
   degs = []
-  
-  
   result_dirname = "../graphall_result/"
   graphtype = f"isl{f}"
   name = os.path.join(result_dirname,graphtype)
@@ -123,11 +141,16 @@ def plot_island(f=2):
   plt.show()
   
 
+
 if __name__ == "__main__":
   
   # plot_detour()
   # plot_island(2)
   # plot_density("../graphs/isl1_graphs/")
-  g = Graph('..//wheel.txt')
-  g.compute_amplification()
-  # g.show()
+  for i in range(800):
+    print(i)
+    g = Graph(f'./alt_island3/{i}.txt')
+    # g.remove_a_bridge()
+    # g.writetofile(f'./alt_island3/{i}.txt')
+    # g.compute_amplification()
+    g.show()
