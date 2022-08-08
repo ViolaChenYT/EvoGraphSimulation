@@ -1,8 +1,10 @@
 #!/bin/bash
 
 input_dir=$1
-output_dir=$2
-
+output_dir="${input_dir}_res"
+if [[ ! -d "$output_dir" ]]; then
+	mkdir $output_dir
+fi 
 script="$input_dir.sh"
 param_file="$input_dir.param.in"
 printf "" >> $param_file
@@ -20,7 +22,7 @@ done
 # write script to be ran
 printf "#!/bin/bash\n" > $script
 echo 'i=$1' >> $script
-echo "i=$((i+1))" >> $script
+echo 'i=$((i+1))' >> $script
 echo 'x=$(sed "${i}q;d"' $param_file "| awk '{print \$1}')" >> $script
 echo 'y=$(sed "${i}q;d"' $param_file "| awk '{print \$2}')" >> $script
 echo "dist=binom" >> $script
@@ -39,8 +41,10 @@ echo 'Log = log/osgJob$(process).log' >> $submit_file
 
 echo "should_transfer_files = YES" >> $submit_file
 echo "when_to_transfer_output = ON_EXIT" >> $submit_file
-echo "gph.out, $input_dir, $param_file, $output_dir" >> $submit_file
+echo "transfer_input_files=gph.out, $input_dir, $param_file, $output_dir" >> $submit_file
 echo "transfer_output_files=$output_dir" >> $submit_file
 
 echo "Queue $cnt" >> $submit_file
+
+condor_submit $submit_file
 #
