@@ -4,4 +4,4 @@
 *.err
 *.output
 *.error
-
+*/osgJob*.out
