@@ -42,7 +42,7 @@ def gen_wheel_reg(n=100):
 def gen_tree_like(d = 4, branch = 2, link = 2):
   output_dir = sys.argv[1]
   idx = 0
-  for size in range(5, 10):
+  for size in range(5, 11):
     for i in range(10, 60): # root cluster
       cnt = i + 1
       queue = SimpleQueue()
