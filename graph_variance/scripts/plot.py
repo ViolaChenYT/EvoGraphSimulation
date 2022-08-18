@@ -432,19 +432,42 @@ def plot_some_graphs():
       ys.append(data.iloc[1,4])
     print(graphtype)
     ax.scatter(xs,ys,label=graphtype,s=5)
-  dirname="../wheel_result/"
-  pfix0 = np.zeros((100,))
-  pfixmax = np.zeros((100,))
-  for filename in os.listdir(dirname):
-    id = int(filename)
-    f = os.path.join(dirname, filename)
-    if os.stat(f).st_size == 0:
-      continue
-    data = pd.read_csv(f, sep='\t', header=None)
-    pfix0[id] = data.iloc[0,4]
-    pfixmax[id] = data.iloc[1,4]
-  plt.scatter(pfix0,pfixmax,label="wheel",s=5)
+  # dirname="../wheel_result/"
+  # pfix0 = np.zeros((100,))
+  # pfixmax = np.zeros((100,))
+  # for filename in os.listdir(dirname):
+  #   id = int(filename)
+  #   f = os.path.join(dirname, filename)
+  #   if os.stat(f).st_size == 0:
+  #     continue
+  #   data = pd.read_csv(f, sep='\t', header=None)
+  #   pfix0[id] = data.iloc[0,4]
+  #   pfixmax[id] = data.iloc[1,4]
+  # plt.scatter(pfix0,pfixmax,label="wheel",s=5)
   ax.legend()
+  plt.show()
+  
+def plot_some_dirs(dirlist):
+  count = np.full((800, ), 0, dtype=int)
+  pfix0 = np.zeros((800,))
+  pfixmax = np.zeros((800,))
+  fig, ax = plt.subplots()
+  for name in dirlist:
+    n = len(os.listdir(name))
+    xs = []
+    ys = []
+    for filename in os.listdir(name):
+      f = os.path.join(name,filename)
+      id = int(filename.split(".")[0])
+      if os.stat(f).st_size == 0:
+        continue
+      data = pd.read_csv(f, sep='\t', header=None)
+      xs.append(data.iloc[0,4])
+      ys.append(data.iloc[1,4])
+    ax.scatter(xs,ys,label=name)
+  ax.legend()
+  plt.xlabel("pfix 0")
+  plt.ylabel("pfix max")
   plt.show()
   
 def plot_skew_concept():
@@ -520,8 +543,8 @@ if __name__ == '__main__':
   # plot_mean1(sys.argv[1])
   # cmp_mean1()
   
-  # plot_some_graphs()
-  plot_wheel()
+  plot_some_dirs(["./graphall_result/isl3", "./graphall_result/assort","./tree_regular_res"])
+  # plot_wheel()
   # plot_skew_concept()
   # plot_skew()
   

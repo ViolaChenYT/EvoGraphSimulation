@@ -1,5 +1,6 @@
 import sys
 import networkx as nx
+import numpy as np
 import matplotlib.pyplot as plt
 from queue import *
 
@@ -67,8 +68,16 @@ def gen_tree_like(d = 4, branch = 2, link = 2):
       idx += 1
   print("Done!")
 
-
+def gen_identical(e_inter=1):
+  output_dir = sys.argv[1]
+  for degree in range(3, 49):
+    g = nx.random_regular_graph(degree,50)
+    el = np.array(g.edges) + 50
+    g.add_edges_from(el)
+    g.add_edges_from([(j, 50 + j) for j in range(e_inter)])
+    nx.write_edgelist(g,f"./{output_dir}/{degree}.txt",data=False)
 
 if __name__ == '__main__':
   # gen_myisland()
-  gen_tree_like()
+  # gen_tree_like()
+  gen_identical()

@@ -161,84 +161,54 @@ def get_mix_pat(filename):
   g = Graph(filename)
   return g.compute_mixing_pattern()
 
-def plot_island(f=2):
-  if f < 0 or f > 3:
-    raise Exception("Invalid graph family")
-  dirname = f"./graphs/isl{f}_graphs/"
-  degs = []
-  result_dirname = "./graphall_result/"
-  graphtype = f"isl{f}"
-  name = os.path.join(result_dirname,graphtype)
-  n = len(os.listdir(name))
-  xs = []
-  ys = []
-  color = [] # amplification factor or whatever it is
+def plot_dir(dirname, result_dirname):
+  n = len(os.listdir(result_dirname))
+  xs = np.zeros((n,))
+  ys = np.zeros((n,))
+  degs = np.zeros((n,))
+  color = np.zeros((n,)) # amplification factor or whatever it is
   for filename in os.listdir(name):
     f = os.path.join(name,filename)
     id = int(filename.split(".")[0])
     if os.stat(f).st_size == 0:
+      print(id)
       continue
+    data = pd.read_csv(f, sep='\t', header=None)
+    xs[id%200] += (data.iloc[0,4])
+    ys[id%200] += (data.iloc[1,4])
     graphfile = f"{dirname}{id}.txt"
     g = Graph(graphfile)
     degrees = np.array(nx.degree(g.G)).astype(int)
-    degs.append(np.std(degrees[:,1]))
-    data = pd.read_csv(f, sep='\t', header=None)
-    xs.append(data.iloc[0,4])
-    ys.append(data.iloc[1,4])
-    g = Graph(graphfile)
-    color.append(g.get_n_triangles())
+    degs[id] = (np.std(degrees[:,1]))
+    # color[id]=(g.compute_amplification())
+    # g.show()
   # print(graphtype)
   # ax.scatter(xs,ys,label=graphtype,s=5)
-  degs = np.array(degs)
+  color = (pd.read_csv(f"~/Desktop/isl{2}_graphs.txt",sep="\t",header=0))[" transitivity "]
+  # print(color)
   ratio = np.array(ys) / np.array(xs)
+  ratio = ratio 
   
-  plt.scatter(degs, ratio, c=color)
-  plt.gca().set(title="", xlabel="degree standard deviation",ylabel="ratio of pfix_max_variance / pfix_0_variance")
-  plt.colorbar()
-  plt.show()
-  
-
-def plot_dir(dirname):
-  result_dirname = dirname+"_res"
-  degs = []
-  n = len(os.listdir(result_dirname))
-  xs = []
-  ys = []
-  color = [] # amplification factor or whatever it is
-  for filename in os.listdir(result_dirname):
-    f = os.path.join(result_dirname,filename)
-    id = int(filename.split(".")[0])
-    if os.stat(f).st_size == 0:
-      continue
-    graphfile = f"{dirname}/{id}.txt"
-    g = Graph(graphfile)
-    degrees = np.array(nx.degree(g.G)).astype(int)
-    degs.append(np.std(degrees[:,1]))
-    data = pd.read_csv(f, sep='\t', header=None)
-    xs.append(data.iloc[0,4])
-    ys.append(data.iloc[1,4])
-    g = Graph(graphfile)
-    color.append(g.compute_amplification())
-  # print(graphtype)
-  # ax.scatter(xs,ys,label=graphtype,s=5)
-  degs = np.array(degs)
-  ratio = np.array(ys) / np.array(xs)
-  
-  plt.scatter(degs, ratio, c=color)
-  plt.gca().set(title="", xlabel="degree standard deviation",ylabel="ratio of pfix_max_variance / pfix_0_variance")
+  plt.scatter(color[0:200],ratio[0:200],c=degs[0:200])
+  # plt.scatter(color,ratio)
+  plt.gca().set(title="", xlabel=sys.argv[1],ylabel="ratio of pfix_max_variance / pfix_0_variance")
   plt.colorbar()
   plt.show()
 
 if __name__ == "__main__":
   
   # plot_detour()
-  plot_island(3)
-  # plot_dir("alt_island3")
+  f = 3
+  dirname = f"./graphs/isl{f}_graphs/"
+  result_dirname = "./graphall_result/"
+  graphtype = f"isl{f}"
+  name = os.path.join(result_dirname,graphtype)
+  plot_dir(dirname, name)
   # plot_density("../graphs/isl1_graphs/")
-  # for i in range(800):
+  # for i in range(20):
     # print(i)
     # g = Graph("./graphs/wellmixed.txt") # sanity check
-    # g = Graph(f'./alt_island3/{i}.txt')
+    # g = Graph(f'./graphs/isl3_graphs/{i}.txt')
     # g.remove_a_bridge()
     # g.writetofile(f'./alt_island3/{i}.txt')
     # g.compute_amplification()
