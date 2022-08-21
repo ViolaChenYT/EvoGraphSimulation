@@ -70,12 +70,22 @@ def gen_tree_like(d = 4, branch = 2, link = 2):
 
 def gen_identical(e_inter=1):
   output_dir = sys.argv[1]
-  for degree in range(3, 49):
-    g = nx.random_regular_graph(degree,50)
-    el = np.array(g.edges) + 50
-    g.add_edges_from(el)
-    g.add_edges_from([(j, 50 + j) for j in range(e_inter)])
-    nx.write_edgelist(g,f"./{output_dir}/{degree}.txt",data=False)
+  # for degree in range(3, 49):
+  #   g = nx.random_regular_graph(degree,50)
+  #   el = np.array(g.edges) + 50
+  #   g.add_edges_from(el)
+  #   g.add_edges_from([(j, 50 + j) for j in range(e_inter)])
+  #   nx.write_edgelist(g,f"./{output_dir}/{degree}.txt",data=False)
+  cnt = 0
+  for degree in range(3,8):
+    for i in range(10,90,2): # every 40
+      g = nx.random_regular_graph(degree,i)
+      el = np.array(nx.random_regular_graph(degree,100-i).edges) + i
+      g.add_edges_from(el)
+      g.add_edges_from([(j, 50 + j) for j in range(e_inter)])
+      
+      nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+      cnt += 1
 
 if __name__ == '__main__':
   # gen_myisland()

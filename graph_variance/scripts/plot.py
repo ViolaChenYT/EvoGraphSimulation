@@ -461,6 +461,7 @@ def plot_some_dirs(dirlist):
       id = int(filename.split(".")[0])
       if os.stat(f).st_size == 0:
         continue
+      print(id)
       data = pd.read_csv(f, sep='\t', header=None)
       xs.append(data.iloc[0,4])
       ys.append(data.iloc[1,4])
@@ -543,7 +544,7 @@ if __name__ == '__main__':
   # plot_mean1(sys.argv[1])
   # cmp_mean1()
   
-  plot_some_dirs(["./graphall_result/isl3", "./graphall_result/assort","./tree_regular_res"])
+  plot_some_dirs(["./graphall_result/isl3", "./graphall_result/assort","./reg_identical_res"])
   # plot_wheel()
   # plot_skew_concept()
   # plot_skew()
