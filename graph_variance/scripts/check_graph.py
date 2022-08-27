@@ -162,34 +162,43 @@ def get_mix_pat(filename):
   return g.compute_mixing_pattern()
 
 def plot_dir(dirname, result_dirname):
-  n = len(os.listdir(result_dirname))
+  n = len(os.listdir(f"{result_dirname}2"))
+  # n=201
   xs = np.zeros((n,))
   ys = np.zeros((n,))
   degs = np.zeros((n,))
   color = np.zeros((n,)) # amplification factor or whatever it is
-  for filename in os.listdir(name):
-    f = os.path.join(name,filename)
-    id = int(filename.split(".")[0])
-    if os.stat(f).st_size == 0:
-      print(id)
-      continue
-    data = pd.read_csv(f, sep='\t', header=None)
-    xs[id%200] += (data.iloc[0,4])
-    ys[id%200] += (data.iloc[1,4])
-    graphfile = f"{dirname}{id}.txt"
-    g = Graph(graphfile)
-    degrees = np.array(nx.degree(g.G)).astype(int)
-    degs[id] = (np.std(degrees[:,1]))
+  for rep in range(1,6):
+    result_dir = f"{result_dirname}{rep}"
+    for filename in os.listdir(result_dir):
+      f = (os.path.join(result_dir,filename))
+      # print(f)
+      id = int(filename.split(".")[0])
+      if os.stat(f).st_size == 0:
+        print(id)
+        continue
+      data = pd.read_csv(f, sep='\t', header=None)
+      graphfile = f"{dirname}{id}.txt"
+      if dirname.find("diff_degree") >= 0:
+        id -= 3
+      xs[id] += (data.iloc[0,4])
+      ys[id] += (data.iloc[1,4])
+      
+      g = Graph(graphfile)
+      degrees = np.array(nx.degree(g.G)).astype(int)
+      degs[id] = (np.std(degrees[:,1]))
+      color[id] = np.mean(degrees)# nx.transitivity(g.G)
     # color[id]=(g.compute_amplification())
     # g.show()
   # print(graphtype)
   # ax.scatter(xs,ys,label=graphtype,s=5)
-  color = (pd.read_csv(f"~/Desktop/isl{2}_graphs.txt",sep="\t",header=0))[" transitivity "]
   # print(color)
-  ratio = np.array(ys) / np.array(xs)
-  ratio = ratio 
-  
-  plt.scatter(color[0:200],ratio[0:200],c=degs[0:200])
+  ratio = np.divide(np.array(ys),np.array(xs))
+  ratio[1] = None
+  ratio[2] = None
+  mask = np.isfinite(ratio)
+  print(np.mean(ratio[mask]), np.std(ratio[mask]))
+  plt.scatter(degs[mask],ratio[mask],c=color[mask])
   # plt.scatter(color,ratio)
   plt.gca().set(title="", xlabel=sys.argv[1],ylabel="ratio of pfix_max_variance / pfix_0_variance")
   plt.colorbar()
@@ -198,12 +207,12 @@ def plot_dir(dirname, result_dirname):
 if __name__ == "__main__":
   
   # plot_detour()
-  f = 3
-  dirname = f"./graphs/isl{f}_graphs/"
-  result_dirname = "./graphall_result/"
+  f = 2
+  dirname = f"./graphs/isl2_graphs/"
+  result_dirname = "./graphs/res_isl2_graphs"
   graphtype = f"isl{f}"
   name = os.path.join(result_dirname,graphtype)
-  plot_dir(dirname, name)
+  plot_dir(dirname, result_dirname)
   # plot_density("../graphs/isl1_graphs/")
   # for i in range(20):
     # print(i)

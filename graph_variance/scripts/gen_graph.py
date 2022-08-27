@@ -87,7 +87,22 @@ def gen_identical(e_inter=1):
       nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
       cnt += 1
 
+def gen_alt_detour():
+  output_dir = sys.argv[1]
+  cnt = 0
+  for interval in range(2, 49):
+    g = nx.complete_graph(50)
+    g.add_edges_from([(i, i+1) for i in range(50,99)])
+    g.add_edge(0,50)
+    g.add_edge(1,99)
+    g.add_edges_from([(50+i, 50 + (i+interval)%50 ) for i in range(49)])
+    print(nx.transitivity(g))
+    nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+    cnt += 1
+    
+
 if __name__ == '__main__':
   # gen_myisland()
   # gen_tree_like()
-  gen_identical()
+  # gen_identical()
+  gen_alt_detour()
