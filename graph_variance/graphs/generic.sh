@@ -4,10 +4,10 @@ input_dir=$1
 
 for idx in {1..5}
 do
-  output_dir="res_${input_dir}$idx"
-  script="$input_dir$idx.sh"
-  param_file="$input_dir$idx.param.in"
-  submit_file="$input_dir$idx.submit"
+  output_dir="res_${input_dir}${idx}"
+  script="$input_dir${idx}.sh"
+  param_file="$input_dir${idx}.param.in"
+  submit_file="$input_dir${idx}.submit"
 
   if [[ ! -d "$output_dir" ]]; then
     mkdir $output_dir
@@ -32,7 +32,7 @@ do
   echo 'x=$(sed "${i}q;d"' $param_file "| awk '{print \$1}')" >> $script
   echo 'y=$(sed "${i}q;d"' $param_file "| awk '{print \$2}')" >> $script
   echo "dist=binom" >> $script
-  echo './gph.out $x $y 100000 $dist 0.1 0.0 0.9' >> $script
+  echo './gph.out $x $y 200000 $dist 0.1 0.0 0.9' >> $script
   chmod +x $script
 
   # write the submit file
