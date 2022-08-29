@@ -69,7 +69,7 @@ def gen_tree_like(d = 4, branch = 2, link = 2):
       idx += 1
   print("Done!")
 
-def gen_identical(e_inter=1):
+def gen_diff_size_same_deg(e_inter=1):
   output_dir = sys.argv[1]
   # for degree in range(3, 49):
   #   g = nx.random_regular_graph(degree,50)
@@ -87,6 +87,18 @@ def gen_identical(e_inter=1):
       
       nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
       cnt += 1
+  cnt = 0
+  
+def gen_diff_deg():
+  output_dir = sys.argv[1]
+  cnt=0
+  for degree in range(3, 49):
+    g = nx.random_regular_graph(degree,50)
+    el = np.array(nx.random_regular_graph(50-degree, 50).edges) + 50
+    g.add_edges_from(el)
+    g.add_edges_from([(j, 50 + j) for j in range(2)])
+    nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+    cnt += 1
 
 def gen_alt_detour():
   output_dir = sys.argv[1]
@@ -105,9 +117,21 @@ def gen_alt_detour():
     nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
     cnt += 1
     
+def gen_very_regular():
+  output_dir = sys.argv[1]
+  cnt = 0
+  for i in range(100):
+    g = nx.complete_graph(50)
+    el = np.array(nx.random_regular_graph(3, 50).edges) + 50
+    g.add_edges_from(el)
+    g.add_edges_from([(j, 50 + j) for j in range(2)])
+    nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+    cnt += 1
 
 if __name__ == '__main__':
   # gen_myisland()
   # gen_tree_like()
   # gen_identical()
-  gen_alt_detour()
+  # gen_alt_detour()
+  # gen_diff_deg()
+  gen_very_regular()

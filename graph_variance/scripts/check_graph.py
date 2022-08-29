@@ -25,7 +25,9 @@ class Graph:
   def __init__(self, filename):
     self.G = nx.read_edgelist(filename,nodetype=int)
     self.list = [list(nbrdict.keys()) for _, nbrdict in self.G.adjacency()]
-    self.degree = list((np.array(nx.degree(self.G)).astype(int))[:,1])
+    arr = ((np.array(nx.degree(self.G)).astype(int)))
+    arr = arr[arr[:, 0].argsort()]
+    self.degree = list(arr[:,1])
     
   
   def get_p_i(self):
@@ -163,7 +165,7 @@ def get_mix_pat(filename):
 
 def plot_dir(dirname, result_dirname):
   n = len(os.listdir(f"{result_dirname}2"))
-  # n=201
+  n = 200
   xs = np.zeros((n,))
   ys = np.zeros((n,))
   degs = np.zeros((n,))
@@ -175,50 +177,61 @@ def plot_dir(dirname, result_dirname):
       # print(f)
       id = int(filename.split(".")[0])
       if os.stat(f).st_size == 0:
-        print(id)
+        print(id, "file is empty")
         continue
       data = pd.read_csv(f, sep='\t', header=None)
       graphfile = f"{dirname}{id}.txt"
-      if dirname.find("diff_degree") >= 0:
-        id -= 3
-      xs[id] += (data.iloc[0,4])
-      ys[id] += (data.iloc[1,4])
+      # if dirname.find("diff_degree") >= 0:
+      #   id -= 3
+      xs[id%n] += (data.iloc[0,4])
+      ys[id%n] += (data.iloc[1,4])
       
       g = Graph(graphfile)
-      degrees = np.array(nx.degree(g.G)).astype(int)
-      degs[id] = (np.std(degrees[:,1]))
-      color[id] = np.mean(degrees)# nx.transitivity(g.G)
+      degrees = g.degree
+      # print(degrees)
+      degs[id%n] = id % 200 #(np.std(degrees)) # abs(degrees[98] - degrees[1]) #
+      def get_size(n):
+        if n < 24: return 4 + 2 * n
+        elif n < 50: 
+          if n-24 < 20: return 5 + (n-24)
+          else: return 25 + 5 * (n-44)
+        elif n < 74: return 4 + 2 *(n - 50)
+        else: 
+          if n-74 < 20: return 5 + (n-74)
+          else: return 25 + 5 * (n-94)
+      color[id%n] = sum(nx.triangles(g.G).values()) / 3# get_size(id%n) # nx.transitivity(g.G)
+      # g.show()
     # color[id]=(g.compute_amplification())
     # g.show()
   # print(graphtype)
   # ax.scatter(xs,ys,label=graphtype,s=5)
   # print(color)
   ratio = np.divide(np.array(ys),np.array(xs))
-  ratio[1] = None
-  ratio[2] = None
+  # return ratio
   mask = np.isfinite(ratio)
-  print(np.mean(ratio[mask]), np.std(ratio[mask]))
   plt.scatter(degs[mask],ratio[mask],c=color[mask])
   # plt.scatter(color,ratio)
   plt.gca().set(title="", xlabel=sys.argv[1],ylabel="ratio of pfix_max_variance / pfix_0_variance")
   plt.colorbar()
   plt.show()
+  
 
 if __name__ == "__main__":
   
   # plot_detour()
   f = 2
-  dirname = f"./graphs/isl2_graphs/"
-  result_dirname = "./graphs/res_isl2_graphs"
+  dirname = f"./graphs/isl3_graphs/"
+  result_dirname = "./graphs/res_isl3_graphs"
   graphtype = f"isl{f}"
   name = os.path.join(result_dirname,graphtype)
-  plot_dir(dirname, result_dirname)
+  ratio = plot_dir(dirname, result_dirname)
   # plot_density("../graphs/isl1_graphs/")
-  # for i in range(20):
+  for i in range(200):
     # print(i)
     # g = Graph("./graphs/wellmixed.txt") # sanity check
-    # g = Graph(f'./graphs/isl3_graphs/{i}.txt')
+    g = Graph(f'./graphs/isl3_graphs/{i}.txt')
+    print(i, sum(nx.triangles(g.G).values()) / 3, ratio[i])
     # g.remove_a_bridge()
     # g.writetofile(f'./alt_island3/{i}.txt')
     # g.compute_amplification()
-    # g.show()
+    g.show()
