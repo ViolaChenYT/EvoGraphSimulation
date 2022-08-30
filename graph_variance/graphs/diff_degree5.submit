@@ -8,4 +8,4 @@ should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 transfer_input_files=gph.out, diff_degree, diff_degree5.param.in, res_diff_degree5
 transfer_output_files=res_diff_degree5
-Queue 47
+Queue 50
