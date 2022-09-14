@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 import pandas as pd
+import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 
@@ -431,7 +432,7 @@ def plot_some_graphs():
       xs.append(data.iloc[0,4])
       ys.append(data.iloc[1,4])
     print(graphtype)
-    ax.scatter(xs,ys,label=graphtype,s=5)
+    plt.scatter(xs,ys,label=graphtype,s=5)
   # dirname="../wheel_result/"
   # pfix0 = np.zeros((100,))
   # pfixmax = np.zeros((100,))

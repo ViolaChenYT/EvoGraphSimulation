@@ -189,7 +189,7 @@ def plot_dir(dirname, result_dirname):
       g = Graph(graphfile)
       degrees = g.degree
       # print(degrees)
-      degs[id%n] = id % 200 #(np.std(degrees)) # abs(degrees[98] - degrees[1]) #
+      degs[id%n] = abs(degrees[98] - degrees[2]) #
       def get_size(n):
         if n < 24: return 4 + 2 * n
         elif n < 50: 
@@ -209,10 +209,10 @@ def plot_dir(dirname, result_dirname):
   ratio = np.divide(np.array(ys),np.array(xs))
   # return ratio
   mask = np.isfinite(ratio)
-  plt.scatter(degs[mask],ratio[mask],c=color[mask])
+  plt.scatter(color[mask],ratio[mask])
   # plt.scatter(color,ratio)
   plt.gca().set(title="", xlabel=sys.argv[1],ylabel="ratio of pfix_max_variance / pfix_0_variance")
-  plt.colorbar()
+  # plt.colorbar()
   plt.show()
   
 
@@ -220,18 +220,19 @@ if __name__ == "__main__":
   
   # plot_detour()
   f = 2
-  dirname = f"./graphs/isl3_graphs/"
-  result_dirname = "./graphs/res_isl3_graphs"
+  name = "var_linearity"
+  dirname = f"./graphs/{name}/"
+  result_dirname = f"./graphs/res_{name}"
   graphtype = f"isl{f}"
   name = os.path.join(result_dirname,graphtype)
   ratio = plot_dir(dirname, result_dirname)
   # plot_density("../graphs/isl1_graphs/")
-  for i in range(200):
-    # print(i)
-    # g = Graph("./graphs/wellmixed.txt") # sanity check
-    g = Graph(f'./graphs/isl3_graphs/{i}.txt')
-    print(i, sum(nx.triangles(g.G).values()) / 3, ratio[i])
-    # g.remove_a_bridge()
-    # g.writetofile(f'./alt_island3/{i}.txt')
-    # g.compute_amplification()
-    g.show()
+  # for i in range(200):
+  #   # print(i)
+  #   # g = Graph("./graphs/wellmixed.txt") # sanity check
+  #   g = Graph(f'./graphs/isl3_graphs/{i}.txt')
+  #   print(i, sum(nx.triangles(g.G).values()) / 3, ratio[i])
+  #   # g.remove_a_bridge()
+  #   # g.writetofile(f'./alt_island3/{i}.txt')
+  #   # g.compute_amplification()
+  #   g.show()

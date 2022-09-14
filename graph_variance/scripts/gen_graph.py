@@ -127,6 +127,24 @@ def gen_very_regular():
     g.add_edges_from([(j, 50 + j) for j in range(2)])
     nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
     cnt += 1
+    
+def gen_many_bridges(): # Sept 14 2022
+  output_dir = sys.argv[1]
+  cnt=0
+  for i in range(1,50):
+    g = nx.complete_graph(50)
+    el = np.array(nx.random_regular_graph(3, 50).edges) + 50
+    g.add_edges_from(el)
+    g.add_edges_from([(j, 50 + j) for j in range(i)]) 
+    # the way bridges are added can be further modified
+    nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+    cnt += 1
+
+def gen_star_regular():
+  pass
+
+def gen_star_wheel():
+  pass
 
 if __name__ == '__main__':
   # gen_myisland()
@@ -134,4 +152,5 @@ if __name__ == '__main__':
   # gen_identical()
   # gen_alt_detour()
   # gen_diff_deg()
-  gen_very_regular()
+  # gen_very_regular()
+  gen_many_bridges()
