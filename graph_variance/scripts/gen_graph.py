@@ -176,6 +176,34 @@ def gen_star_regular():
   pass
 
 def gen_star_wheel():
+  output_dir = sys.argv[1]
+  cnt=0
+  satellites = [i for i in range(1,50)]
+  
+  # make wheel
+  el = [(50+i, 50+(i+1)%25) for i in range(25)] + [(75+i, 75+(i+1)%25) for i in range(25)] + [(i, i+25) for i in range(50,75)]
+  
+  # make g the star graph
+  g = nx.Graph()
+  star_list = [(0, satellite) for satellite in range(1,50)]
+  g.add_edges_from(star_list)
+  g.add_edges_from(el)
+  g.add_edges_from([(j+1, 50 + j) for j in range(1)])  # link with satellite
+  links = 0
+  existing_links = set()
+  while links < 100:
+    a, b = random.sample(satellites,2)
+    a, b = min(a,b), max(a,b)
+    if (a,b) not in existing_links:
+      g.add_edge(a,b)
+      existing_links.add((a,b))
+      links += 1
+      # the way bridges are added can be further modified
+      nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+      # nx.draw_networkx(g)
+      # plt.show()
+      cnt += 1
+# repeat for bridge to center of star
   pass
 
 if __name__ == '__main__':
@@ -186,4 +214,5 @@ if __name__ == '__main__':
   # gen_diff_deg()
   # gen_very_regular()
   # gen_many_bridges()
-  gen_star_regular()
+  # gen_star_regular()
+  gen_star_wheel()
