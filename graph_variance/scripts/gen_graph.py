@@ -191,7 +191,7 @@ def gen_star_wheel():
   g.add_edges_from([(j+1, 50 + j) for j in range(1)])  # link with satellite
   links = 0
   existing_links = set()
-  while links < 100:
+  while links < 500:
     a, b = random.sample(satellites,2)
     a, b = min(a,b), max(a,b)
     if (a,b) not in existing_links:
@@ -206,6 +206,44 @@ def gen_star_wheel():
 # repeat for bridge to center of star
   pass
 
+def gen_diff_fraction_triangles():
+  output_dir = sys.argv[1]
+  cnt=0
+  satellites = [i for i in range(1,50)]
+  for degree in range (3, 50, 5): # degree of the regular graph
+    el = np.array(nx.random_regular_graph(degree, 50).edges) + 50
+    star_list = [(0, satellite) for satellite in range(1,50)]
+    for satellite_set in range(11,40):
+      g = nx.Graph()
+      g.add_edges_from(star_list)
+      g.add_edges_from(el)
+      g.add_edges_from([(j+1, 50 + j) for j in range(1)])  # link with satellite
+      
+      partial_link = [(i, i+1) for i in range(1, satellite_set)]
+      
+      g.add_edges_from(partial_link)
+      p1,p2 = 1, satellite_set+1
+      offset = 2
+      edge_cnt = 0
+      while p1 + offset <= p2 and offset <= satellite_set and edge_cnt <= 49 - satellite_set:
+        g.add_edge(p1, p1+offset)
+        p1 += 1
+        edge_cnt += 1
+        if p1 + offset == p2:
+          p1 = 1
+          offset += 1
+        # print(offset, satellite_set)
+      
+      # the way bridges are added can be further modified
+      nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+      # nx.draw_networkx(g)
+      # plt.show()
+      cnt += 1
+      if cnt%10 == 0: print(".",end="",flush=True)
+  # repeat for bridge to center of star
+  print()
+  pass
+
 if __name__ == '__main__':
   # gen_myisland()
   # gen_tree_like()
@@ -215,4 +253,5 @@ if __name__ == '__main__':
   # gen_very_regular()
   # gen_many_bridges()
   # gen_star_regular()
-  gen_star_wheel()
+  # gen_star_wheel()
+  gen_diff_fraction_triangles()
