@@ -244,6 +244,19 @@ def gen_diff_fraction_triangles():
   print()
   pass
 
+def gen_90_10():
+  output_dir = sys.argv[1]
+  cnt=0
+  for degree in range(3, 75):
+    el = np.array(nx.random_regular_graph(degree, 90).edges) + 10
+    for small_deg in range(3,10):
+      g = nx.random_regular_graph(small_deg, 10)
+      g.add_edges_from(el)
+      g.add_edges_from([(j, 90 + j) for j in range(1)])
+      nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+      cnt += 1
+      if cnt % 20 == 0: print(".",end="",flush=True)
+
 if __name__ == '__main__':
   # gen_myisland()
   # gen_tree_like()
@@ -254,4 +267,5 @@ if __name__ == '__main__':
   # gen_many_bridges()
   # gen_star_regular()
   # gen_star_wheel()
-  gen_diff_fraction_triangles()
+  # gen_diff_fraction_triangles()
+  gen_90_10()
