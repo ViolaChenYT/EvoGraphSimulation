@@ -152,33 +152,32 @@ def gen_star_regular():
   output_dir = sys.argv[1]
   cnt=0
   satellites = [i for i in range(1,50)]
-  for degree in range (3, 50, 10): # degree of the regular graph
-    el = np.array(nx.random_regular_graph(degree, 50).edges) + 50
-    # add up to 100 random edges to satellites
-    # randomly (?) add i edges into the graph
-    # perhaps not random to control for the no. of triangles? 
-    # need to do something about # triangles
-  
-    # make g the star graph
-    g = nx.Graph()
-    star_list = [(0, satellite) for satellite in range(1,50)]
-    g.add_edges_from(star_list)
-    g.add_edges_from(el)
-    g.add_edges_from([(j, 50 + j) for j in range(1)])  # link with satellite
-    links = 0
-    existing_links = set()
-    while links < 500:
-      a, b = random.sample(satellites,2)
-      a, b = min(a,b), max(a,b)
-      if (a,b) not in existing_links:
-        g.add_edge(a,b)
-        existing_links.add((a,b))
-        links += 1
-        # the way bridges are added can be further modified
-        nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
-        # nx.draw_networkx(g)
-        # plt.show()
-        cnt += 1
+  el = np.array(nx.random_regular_graph(3, 50).edges) + 50
+  # add up to 100 random edges to satellites
+  # randomly (?) add i edges into the graph
+  # perhaps not random to control for the no. of triangles? 
+  # need to do something about # triangles
+
+  # make g the star graph
+  g = nx.Graph()
+  star_list = [(0, satellite) for satellite in range(1,50)]
+  g.add_edges_from(star_list)
+  g.add_edges_from(el)
+  g.add_edges_from([(j, 50 + j) for j in range(1)])  # link with satellite
+  links = 0
+  existing_links = set()
+  while links < 500:
+    a, b = random.sample(satellites,2)
+    a, b = min(a,b), max(a,b)
+    if (a,b) not in existing_links:
+      g.add_edge(a,b)
+      existing_links.add((a,b))
+      links += 1
+      # the way bridges are added can be further modified
+      nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+      # nx.draw_networkx(g)
+      # plt.show()
+      cnt += 1
   # repeat for bridge to center of star
   pass
 
@@ -272,7 +271,7 @@ if __name__ == '__main__':
   # gen_diff_deg()
   # gen_very_regular()
   # gen_many_bridges()
-  # gen_star_regular()
-  gen_star_wheel()
+  gen_star_regular()
+  # gen_star_wheel()
   # gen_diff_fraction_triangles()
   # gen_90_10()
