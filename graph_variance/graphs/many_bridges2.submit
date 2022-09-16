@@ -1,0 +1,11 @@
+Universe = vanilla
+Executable = many_bridges2.sh
+Arguments = $(process)
+Error = log/osgJob$(process).err
+Output = log/osgJob$(process).out
+Log = log/osgJob$(process).log
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+transfer_input_files=gph.out, many_bridges, many_bridges2.param.in, res_many_bridges2
+transfer_output_files=res_many_bridges2
+Queue 49
