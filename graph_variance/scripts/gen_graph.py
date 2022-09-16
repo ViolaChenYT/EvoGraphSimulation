@@ -132,11 +132,18 @@ def gen_very_regular():
 def gen_many_bridges(): # Sept 14 2022
   output_dir = sys.argv[1]
   cnt=0
+  el = np.array(nx.random_regular_graph(3, 50).edges) + 50
   for i in range(1,50):
     g = nx.complete_graph(50)
-    el = np.array(nx.random_regular_graph(3, 50).edges) + 50
     g.add_edges_from(el)
-    g.add_edges_from([(j, 50 + j) for j in range(i)]) 
+    g.add_edges_from([(0, 50 + j) for j in range(i)]) 
+    # the way bridges are added can be further modified
+    nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+    cnt += 1
+  for i in range(1,50):
+    g = nx.complete_graph(50)
+    g.add_edges_from(el)
+    g.add_edges_from([(j, 50) for j in range(i)]) 
     # the way bridges are added can be further modified
     nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
     cnt += 1
@@ -157,10 +164,10 @@ def gen_star_regular():
     star_list = [(0, satellite) for satellite in range(1,50)]
     g.add_edges_from(star_list)
     g.add_edges_from(el)
-    g.add_edges_from([(j+1, 50 + j) for j in range(1)])  # link with satellite
+    g.add_edges_from([(j, 50 + j) for j in range(1)])  # link with satellite
     links = 0
     existing_links = set()
-    while links < 100:
+    while links < 500:
       a, b = random.sample(satellites,2)
       a, b = min(a,b), max(a,b)
       if (a,b) not in existing_links:
@@ -188,7 +195,7 @@ def gen_star_wheel():
   star_list = [(0, satellite) for satellite in range(1,50)]
   g.add_edges_from(star_list)
   g.add_edges_from(el)
-  g.add_edges_from([(j+1, 50 + j) for j in range(1)])  # link with satellite
+  g.add_edges_from([(j, 50 + j) for j in range(1)])  # link with satellite
   links = 0
   existing_links = set()
   while links < 500:
@@ -247,15 +254,15 @@ def gen_diff_fraction_triangles():
 def gen_90_10():
   output_dir = sys.argv[1]
   cnt=0
-  for degree in range(3, 75):
+  el_small = np.array(nx.random_regular_graph(3, 10).edges)
+  for degree in range(3, 75): # 75 because otherwise it takes forever..haiz
     el = np.array(nx.random_regular_graph(degree, 90).edges) + 10
-    for small_deg in range(3,10):
-      g = nx.random_regular_graph(small_deg, 10)
-      g.add_edges_from(el)
-      g.add_edges_from([(j, 90 + j) for j in range(1)])
-      nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
-      cnt += 1
-      if cnt % 20 == 0: print(".",end="",flush=True)
+    g = nx.Graph()
+    g.add_edges_from(el_small)
+    g.add_edges_from(el)
+    g.add_edges_from([(j, 90 + j) for j in range(1)])
+    nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+    cnt += 1
 
 if __name__ == '__main__':
   # gen_myisland()
@@ -266,6 +273,6 @@ if __name__ == '__main__':
   # gen_very_regular()
   # gen_many_bridges()
   # gen_star_regular()
-  # gen_star_wheel()
+  gen_star_wheel()
   # gen_diff_fraction_triangles()
-  gen_90_10()
+  # gen_90_10()
