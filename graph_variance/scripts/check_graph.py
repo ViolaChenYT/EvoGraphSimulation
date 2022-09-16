@@ -163,9 +163,18 @@ def get_mix_pat(filename):
   g = Graph(filename)
   return g.compute_mixing_pattern()
 
+def get_size(n):
+  if n < 24: return 4 + 2 * n
+  elif n < 50: 
+    if n-24 < 20: return 5 + (n-24)
+    else: return 25 + 5 * (n-44)
+  elif n < 74: return 4 + 2 *(n - 50)
+  else: 
+    if n-74 < 20: return 5 + (n-74)
+    else: return 25 + 5 * (n-94)
+
 def plot_dir(dirname, result_dirname):
-  n = len(os.listdir(f"{result_dirname}2"))
-  n = 200
+  n = len(os.listdir(f"{result_dirname}1"))
   xs = np.zeros((n,))
   ys = np.zeros((n,))
   degs = np.zeros((n,))
@@ -181,38 +190,24 @@ def plot_dir(dirname, result_dirname):
         continue
       data = pd.read_csv(f, sep='\t', header=None)
       graphfile = f"{dirname}{id}.txt"
-      # if dirname.find("diff_degree") >= 0:
-      #   id -= 3
       xs[id%n] += (data.iloc[0,4])
       ys[id%n] += (data.iloc[1,4])
       
       g = Graph(graphfile)
       degrees = g.degree
       # print(degrees)
-      degs[id%n] = abs(degrees[98] - degrees[2]) #
-      def get_size(n):
-        if n < 24: return 4 + 2 * n
-        elif n < 50: 
-          if n-24 < 20: return 5 + (n-24)
-          else: return 25 + 5 * (n-44)
-        elif n < 74: return 4 + 2 *(n - 50)
-        else: 
-          if n-74 < 20: return 5 + (n-74)
-          else: return 25 + 5 * (n-94)
-      color[id%n] = sum(nx.triangles(g.G).values()) / 3# get_size(id%n) # nx.transitivity(g.G)
+      degs[id%n] = abs(degrees[98] - degrees[2]) # np.std(degrees) # abs(degrees[98] - degrees[2]) #
+      
+      color[id%n] = sum(nx.triangles(g.G).values()) / 3# get_size(id%n) # nx.transitivity(g.G) # g.compute_amplification()
       # g.show()
-    # color[id]=(g.compute_amplification())
-    # g.show()
-  # print(graphtype)
-  # ax.scatter(xs,ys,label=graphtype,s=5)
-  # print(color)
   ratio = np.divide(np.array(ys),np.array(xs))
-  # return ratio
   mask = np.isfinite(ratio)
-  plt.scatter(color[mask],ratio[mask])
+  x_axis = degs
+  colors = None
+  plt.scatter(x_axis,ratio,c=colors)
   # plt.scatter(color,ratio)
   plt.gca().set(title="", xlabel=sys.argv[1],ylabel="ratio of pfix_max_variance / pfix_0_variance")
-  # plt.colorbar()
+  plt.colorbar()
   plt.show()
   
 
@@ -220,7 +215,7 @@ if __name__ == "__main__":
   
   # plot_detour()
   f = 2
-  name = "var_linearity"
+  name = sys.argv[2]
   dirname = f"./graphs/{name}/"
   result_dirname = f"./graphs/res_{name}"
   graphtype = f"isl{f}"
