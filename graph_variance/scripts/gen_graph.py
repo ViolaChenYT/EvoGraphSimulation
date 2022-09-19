@@ -152,7 +152,7 @@ def gen_star_regular():
   output_dir = sys.argv[1]
   cnt=0
   satellites = [i for i in range(1,50)]
-  el = np.array(nx.random_regular_graph(3, 50).edges) + 50
+  el = np.array(nx.random_regular_graph(43, 50).edges) + 50
   # add up to 100 random edges to satellites
   # randomly (?) add i edges into the graph
   # perhaps not random to control for the no. of triangles? 

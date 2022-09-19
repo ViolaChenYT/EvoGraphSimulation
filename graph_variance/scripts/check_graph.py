@@ -204,7 +204,7 @@ def plot_dir(dirname, result_dirname):
   mask = np.isfinite(ratio)
   x_axis = degs
   colors = None
-  plt.scatter(x_axis,ratio,c=colors)
+  plt.scatter(x_axis,ratio[mask],c=colors)
   # plt.scatter(color,ratio)
   plt.gca().set(title="", xlabel=sys.argv[1],ylabel="ratio of pfix_max_variance / pfix_0_variance")
   plt.colorbar()

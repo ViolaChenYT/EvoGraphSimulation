@@ -303,67 +303,74 @@ def get_param_graph_label(i):
   # else: return "rgg r= 0.5"
   
 def plot_graphs():
-  dirname = "graph_result"
+  # dirname = "graph_result"
   groups = np.vectorize(get_param_graph_label)(np.arange(0,800))
-  count = np.full((800, ), 0, dtype=int)
-  pfix0 = np.zeros((800,))
-  pfixmax = np.zeros((800,))
-  for filename in os.listdir(dirname):
-    id = int(filename.split(".")[0]) % 800
-    f = os.path.join(dirname, filename)
-    if os.stat(f).st_size == 0:
-      continue
-    data = pd.read_csv(f, sep='\t', header=None)
-    pfix0[id] += data.iloc[0,4]
-    pfixmax[id] += data.iloc[1,4]
-    count[id] += 1
-  dirname = dirname+"1"
-  for filename in os.listdir(dirname):
-    id = int(filename.split(".")[0]) % 800
-    f = os.path.join(dirname, filename)
-    if os.stat(f).st_size == 0:
-      continue
-    data = pd.read_csv(f, sep='\t', header=None)
-    pfix0[id] += data.iloc[0,4]
-    pfixmax[id] += data.iloc[1,4]
-    count[id] += 1
-  xs = np.divide(pfix0, count)
-  ys = np.divide(pfixmax, count)
-  np.save("pfix0.npy",xs)
-  np.save("pfixmax.npy",ys)
+  # count = np.full((800, ), 0, dtype=int)
+  # pfix0 = np.zeros((800,))
+  # pfixmax = np.zeros((800,))
+  # for filename in os.listdir(dirname):
+  #   id = int(filename.split(".")[0]) % 800
+  #   f = os.path.join(dirname, filename)
+  #   if os.stat(f).st_size == 0:
+  #     continue
+  #   data = pd.read_csv(f, sep='\t', header=None)
+  #   pfix0[id] += data.iloc[0,4]
+  #   pfixmax[id] += data.iloc[1,4]
+  #   count[id] += 1
+  # dirname = dirname+"1"
+  # for filename in os.listdir(dirname):
+  #   id = int(filename.split(".")[0]) % 800
+  #   f = os.path.join(dirname, filename)
+  #   if os.stat(f).st_size == 0:
+  #     continue
+  #   data = pd.read_csv(f, sep='\t', header=None)
+  #   pfix0[id] += data.iloc[0,4]
+  #   pfixmax[id] += data.iloc[1,4]
+  #   count[id] += 1
+  # xs = np.divide(pfix0, count)
+  # ys = np.divide(pfixmax, count)
+  # np.save("pfix0.npy",xs)
+  # np.save("pfixmax.npy",ys)
+  xs, ys = np.load("pfix0.npy"), np.load("pfixmax.npy")
   fig, ax = plt.subplots()
   for g in np.unique(groups):
       ix = np.where(groups == g)
       ax.scatter(xs[ix], ys[ix], label = g,s=3)
-  lst = ["20_3","assort","complex","fam","isl0","isl1","isl2","isl3","mv","pa","regx4"]
+  lst = ["20_3","assort","complex","fam","isl0","isl1","mv","pa","regx4"]
   dirname = "graphall_result"
   for graphtype in lst:
     name = os.path.join(dirname,graphtype)
     n = len(os.listdir(name))
-    xs = []
-    ys = []
+    xs1 = []
+    ys1 = []
     for filename in os.listdir(name):
       f = os.path.join(name,filename)
       id = int(filename.split(".")[0])
       if os.stat(f).st_size == 0:
         continue
       data = pd.read_csv(f, sep='\t', header=None)
-      xs.append(data.iloc[0,4])
-      ys.append(data.iloc[1,4])
+      xs1.append(data.iloc[0,4])
+      ys1.append(data.iloc[1,4])
     print(graphtype)
-    ax.scatter(xs,ys,label=graphtype,s=3)
-  dirname="wheel_result"
-  pfix0 = np.zeros((100,))
-  pfixmax = np.zeros((100,))
-  for filename in os.listdir(dirname):
-    id = int(filename)
-    f = os.path.join(dirname, filename)
-    if os.stat(f).st_size == 0:
-      continue
-    data = pd.read_csv(f, sep='\t', header=None)
-    pfix0[id] = data.iloc[0,4]
-    pfixmax[id] = data.iloc[1,4]
-  plt.scatter(pfix0,pfixmax,label="wheel",s=3)
+    ax.scatter(xs1,ys1,label=graphtype,s=3)
+    xs = np.concatenate((xs, np.array(xs1)))
+    ys = np.concatenate((ys, np.array(ys1)))
+  # dirname="wheel_result"
+  # pfix0 = np.zeros((100,))
+  # pfixmax = np.zeros((100,))
+  # for filename in os.listdir(dirname):
+  #   id = int(filename)
+  #   f = os.path.join(dirname, filename)
+  #   if os.stat(f).st_size == 0:
+  #     continue
+  #   data = pd.read_csv(f, sep='\t', header=None)
+  #   pfix0[id] = data.iloc[0,4]
+  #   pfixmax[id] = data.iloc[1,4]
+  # plt.scatter(pfix0,pfixmax,label="wheel",s=3)
+  m,b = np.polyfit(xs,ys,1)
+  plt.plot(xs, m*xs + b)
+  plt.text(xs[0],ys[0], f"y = {m:.3f}x + {b:.3f}")
+  print(m,b)
   ax.legend()
   plt.show()
 
@@ -544,8 +551,8 @@ if __name__ == '__main__':
   # one_model('star','uni')
   # plot_mean1(sys.argv[1])
   # cmp_mean1()
-  
-  plot_some_dirs(["./graphall_result/isl3", "./graphall_result/assort","./reg_identical_res"])
+  plot_graphs()
+  # plot_some_dirs(["./graphall_result/isl3", "./graphall_result/assort","./reg_identical_res"])
   # plot_wheel()
   # plot_skew_concept()
   # plot_skew()
