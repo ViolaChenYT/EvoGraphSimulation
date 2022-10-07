@@ -369,7 +369,7 @@ def plot_graphs():
   # plt.scatter(pfix0,pfixmax,label="wheel",s=3)
   m,b = np.polyfit(xs,ys,1)
   plt.plot(xs, m*xs + b)
-  plt.plot(xs, m*xs + b)
+  plt.plot(xs, 0.632 * xs)
   plt.text(xs[0],ys[0], f"y = {m:.3f}x + {b:.3f}")
   print(m,b)
   ax.legend()

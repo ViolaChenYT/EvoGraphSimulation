@@ -267,7 +267,7 @@ def gen_critical_node():
   output_dir = sys.argv[1]
   cnt = 0
   n = 52
-  el_small = np.array(nx.random_regular_graph(4, 100-n+1).edges)+n
+  el_small = np.array(nx.random_regular_graph(4, 100-n+1).edges)+n-1
   for degree in range(3,48):
     g = nx.random_regular_graph(degree, n)
     g.add_edges_from(el_small)
@@ -278,7 +278,7 @@ def gen_critical_node_dense():
   output_dir = sys.argv[1]
   cnt = 0
   n = 52
-  el_small = np.array(nx.complete_graph(100-n+1).edges)+n
+  el_small = np.array(nx.complete_graph(100-n+1).edges)+n-1
   for degree in range(3,n):
     g = nx.random_regular_graph(degree, n)
     g.add_edges_from(el_small)
@@ -306,5 +306,5 @@ if __name__ == '__main__':
   # gen_star_regular()
   # gen_star_wheel()
   # gen_diff_fraction_triangles()
-  gen_90_10_node()
-  # gen_critical_node_dense()
+  # gen_90_10_node()
+  gen_critical_node()
