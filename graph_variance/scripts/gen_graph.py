@@ -262,7 +262,39 @@ def gen_90_10():
     g.add_edges_from([(j, 90 + j) for j in range(1)])
     nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
     cnt += 1
-
+    
+def gen_critical_node():
+  output_dir = sys.argv[1]
+  cnt = 0
+  n = 52
+  el_small = np.array(nx.random_regular_graph(4, 100-n+1).edges)+n
+  for degree in range(3,48):
+    g = nx.random_regular_graph(degree, n)
+    g.add_edges_from(el_small)
+    nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+    cnt += 1
+  
+def gen_critical_node_dense():
+  output_dir = sys.argv[1]
+  cnt = 0
+  n = 52
+  el_small = np.array(nx.complete_graph(100-n+1).edges)+n
+  for degree in range(3,n):
+    g = nx.random_regular_graph(degree, n)
+    g.add_edges_from(el_small)
+    nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+    cnt += 1
+ 
+def gen_90_10_node():
+    output_dir = sys.argv[1]
+    cnt=0
+    el_small = np.array(nx.random_regular_graph(4, 11).edges) + 89
+    for degree in range(4, 75): # 75 because otherwise it takes forever..haiz
+      g = nx.random_regular_graph(degree,90)
+      g.add_edges_from(el_small)
+      nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+      cnt += 1
+  
 if __name__ == '__main__':
   # gen_myisland()
   # gen_tree_like()
@@ -271,7 +303,8 @@ if __name__ == '__main__':
   # gen_diff_deg()
   # gen_very_regular()
   # gen_many_bridges()
-  gen_star_regular()
+  # gen_star_regular()
   # gen_star_wheel()
   # gen_diff_fraction_triangles()
-  # gen_90_10()
+  gen_90_10_node()
+  # gen_critical_node_dense()

@@ -3,6 +3,7 @@ import numpy as np
 import sys, os
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 ##############################################################################
 # Util functions
 def get_first_inverse(pi):
@@ -204,11 +205,13 @@ def plot_dir(dirname, result_dirname):
   mask = np.isfinite(ratio)
   x_axis = degs
   colors = None
-  plt.scatter(x_axis,ratio[mask],c=colors)
+  df = pd.DataFrame({f"{sys.argv[1]}":x_axis,"pfix_max_variance / pfix_0_variance":ratio})
+  print(df)
+  g = sns.lmplot(x=sys.argv[1], y="pfix_max_variance / pfix_0_variance", data=df)
   # plt.scatter(color,ratio)
-  plt.gca().set(title="", xlabel=sys.argv[1],ylabel="ratio of pfix_max_variance / pfix_0_variance")
-  plt.colorbar()
-  plt.show()
+  # plt.gca().set(title="", xlabel=sys.argv[1],ylabel="ratio of pfix_max_variance / pfix_0_variance")
+  # plt.colorbar()
+  g.show()
   
 
 if __name__ == "__main__":
