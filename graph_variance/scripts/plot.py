@@ -4,6 +4,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import os
+import scipy
 
 def plot_window():
   data = pd.read_csv('./results/window1.txt',sep='\t',header=None)
@@ -302,6 +303,38 @@ def get_param_graph_label(i):
   #   return "rgg r= 0.3"
   # else: return "rgg r= 0.5"
   
+def fx(x, pfix):
+  '''return pfix - (1-(1+S_eff)^{-1}) / (1-(1+S_eff)^{-N})
+     solving for x = S_eff
+  '''
+  term = (1 - 1/(1 + x)) / (1 - 1 / ((1 + x) ** 100))
+  return pfix-term
+  
+
+def plot_effective():
+  '''plot the effective fitness S_eff instead of pfix'''
+  start = np.array([1.1])
+  xs, ys = np.load("pfix0.npy"), np.load("pfixmax.npy")
+  n = len(xs)
+  seff0 = np.zeros((n,))
+  seffmax = np.zeros((n,))
+  for i in range(n):
+    seff0[i] = scipy.optimize.fsolve(fx, x0=start, args=(xs[i]))
+    seffmax[i] = scipy.optimize.fsolve(fx, x0=start, args=(ys[i]))
+    
+  fig, ax = plt.subplots()
+  for g in np.unique(groups):
+      ix = np.where(groups == g)
+      ax.scatter(seff0[ix], seffmax[ix], label = g,s=3)
+  m,b = np.polyfit(seff0,seffmax,1)
+  plt.plot(xs, m*xs + b)
+  # plt.plot(xs, 0.632 * xs)
+  plt.text(xs[0],ys[0], f"y = {m:.3f}x + {b:.3f}")
+  print(m,b)
+  ax.legend()
+  plt.show()
+  # lst = ["20_3","assort","complex","fam","isl0","isl1","mv","pa","regx4"]
+
 def plot_graphs():
   # dirname = "graph_result"
   groups = np.vectorize(get_param_graph_label)(np.arange(0,800))
@@ -367,6 +400,8 @@ def plot_graphs():
   #   pfix0[id] = data.iloc[0,4]
   #   pfixmax[id] = data.iloc[1,4]
   # plt.scatter(pfix0,pfixmax,label="wheel",s=3)
+  # np.save("xs.npy",xs)
+  # np.save("ys.npy",ys)
   m,b = np.polyfit(xs,ys,1)
   plt.plot(xs, m*xs + b)
   plt.plot(xs, 0.632 * xs)

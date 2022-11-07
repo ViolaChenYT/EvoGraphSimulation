@@ -1,4 +1,4 @@
-import sys
+import sys, os
 import networkx as nx
 import numpy as np
 import random
@@ -295,6 +295,34 @@ def gen_90_10_node():
       nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
       cnt += 1
   
+def gen_larger_size():
+  kind = sys.argv[1]
+  cnt = 0
+  if kind.startswith("well"):
+    output_dir = "graphs/largeN_wellmixed"
+    if not os.path.exists(output_dir):
+      os.makedirs(output_dir)
+    for N in range(50, 1000, 50):
+      g = nx.complete_graph(N)
+      nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+      cnt += 1
+  elif kind.startswith("reg"):
+    output_dir = "graphs/largeN_regular"
+    if not os.path.exists(output_dir):
+      os.makedirs(output_dir)
+    for N in range(50, 1000, 50):
+      g = nx.random_regular_graph(3,N)
+      nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+      cnt += 1
+  elif kind.startswith("star"):
+    output_dir = "graphs/largeN_star"
+    if not os.path.exists(output_dir):
+      os.makedirs(output_dir)
+    for N in range(50, 1000, 50):
+      g = nx.star_graph(N)
+      nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+      cnt += 1
+  
 if __name__ == '__main__':
   # gen_myisland()
   # gen_tree_like()
@@ -307,4 +335,5 @@ if __name__ == '__main__':
   # gen_star_wheel()
   # gen_diff_fraction_triangles()
   # gen_90_10_node()
-  gen_critical_node()
+  # gen_critical_node()
+  gen_larger_size()
