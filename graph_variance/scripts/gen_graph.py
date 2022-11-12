@@ -316,7 +316,7 @@ def gen_larger_size():
       for N in range(50, 1000, 50):
         g = nx.random_regular_graph(3,N)
         nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
-      cnt += 1
+        cnt += 1
   elif kind.startswith("star"):
     output_dir = "graphs/largeN_star"
     if not os.path.exists(output_dir):
