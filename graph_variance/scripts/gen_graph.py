@@ -296,32 +296,36 @@ def gen_90_10_node():
       cnt += 1
   
 def gen_larger_size():
+  repeats = 100
   kind = sys.argv[1]
   cnt = 0
   if kind.startswith("well"):
     output_dir = "graphs/largeN_wellmixed"
     if not os.path.exists(output_dir):
       os.makedirs(output_dir)
-    for N in range(50, 1000, 50):
-      g = nx.complete_graph(N)
-      nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
-      cnt += 1
+    for _ in range(repeats):
+      for N in range(50, 1000, 50):
+        g = nx.complete_graph(N)
+        nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+        cnt += 1
   elif kind.startswith("reg"):
     output_dir = "graphs/largeN_regular"
     if not os.path.exists(output_dir):
       os.makedirs(output_dir)
-    for N in range(50, 1000, 50):
-      g = nx.random_regular_graph(3,N)
-      nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+    for _ in range(repeats):
+      for N in range(50, 1000, 50):
+        g = nx.random_regular_graph(3,N)
+        nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
       cnt += 1
   elif kind.startswith("star"):
     output_dir = "graphs/largeN_star"
     if not os.path.exists(output_dir):
       os.makedirs(output_dir)
-    for N in range(50, 1000, 50):
-      g = nx.star_graph(N)
-      nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
-      cnt += 1
+    for _ in range(repeats):
+      for N in range(50, 1000, 50): # 19
+        g = nx.star_graph(N)
+        nx.write_edgelist(g,f"./{output_dir}/{cnt}.txt",data=False)
+        cnt += 1
   
 if __name__ == '__main__':
   # gen_myisland()
