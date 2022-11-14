@@ -32,7 +32,7 @@ do
   echo 'x=$(sed "${i}q;d"' $param_file "| awk '{print \$1}')" >> $script
   echo 'y=$(sed "${i}q;d"' $param_file "| awk '{print \$2}')" >> $script
   echo "dist=binom" >> $script
-  echo './gph.out $x $y 200000 $dist 0.1 0.0 0.9' >> $script
+  echo './gph.out $x $y 100000 $dist 0.1 0.0 0.9' >> $script
   chmod +x $script
 
   # write the submit file

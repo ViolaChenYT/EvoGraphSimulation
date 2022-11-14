@@ -145,6 +145,7 @@ Simulator::~Simulator()
     }
     delete [] edgelist;
     delete [] degrees;
+
     file.close();
 }
 
@@ -333,6 +334,8 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform")
         times[0] += t;
     }
     delete[] mutant;
+    delete[] fitness;
+    delete[] acc_fit;
 }
 // simulate birth-death processes for input trial number of times
 void Simulator::simulate(int trials, double s = 0.0, double var = 0, string dist = "uniform")
