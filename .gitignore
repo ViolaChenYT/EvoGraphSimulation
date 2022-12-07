@@ -8,4 +8,4 @@
 *.in
 *.submit
 */osgJob*.out
-*/*/*.g6
+*.g6
