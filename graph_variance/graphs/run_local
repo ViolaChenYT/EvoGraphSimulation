@@ -1,0 +1,9 @@
+#!/bin/bash
+
+toexec=$1;
+nruns=$2
+
+for idx in $(seq 0 $nruns)
+do
+  /bin/bash $toexec $idx
+done

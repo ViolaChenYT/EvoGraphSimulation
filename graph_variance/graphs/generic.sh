@@ -2,9 +2,9 @@
 
 input_dir=$1
 
-for idx in {1..5}
+for idx in {1..1}
 do
-  output_dir="res_s0_${input_dir}${idx}"
+  output_dir="res_${input_dir}${idx}"
   script="$input_dir${idx}.sh"
   param_file="$input_dir${idx}.param.in"
   submit_file="$input_dir${idx}.submit"
@@ -32,7 +32,7 @@ do
   echo 'x=$(sed "${i}q;d"' $param_file "| awk '{print \$1}')" >> $script
   echo 'y=$(sed "${i}q;d"' $param_file "| awk '{print \$2}')" >> $script
   echo "dist=binom" >> $script
-  echo './gph.out $x $y 1000000 $dist 0.0 0.0 0.9' >> $script
+  echo './gph $x $y 10000 $dist 0.1 0.0 0.9' >> $script
   chmod +x $script
 
   # write the submit file
@@ -46,11 +46,12 @@ do
 
   echo "should_transfer_files = YES" >> $submit_file
   echo "when_to_transfer_output = ON_EXIT" >> $submit_file
-  echo "transfer_input_files=gph.out, $input_dir, $param_file, $output_dir" >> $submit_file
-  echo "transfer_output_files=$output_dir" >> $submit_file
+  echo "transfer_input_files=gph, $input_dir/\$(process).txt, $param_file, $output_dir" >> $submit_file
+  echo "transfer_output_files=$output_dir/" >> $submit_file
+  # echo "transfer_output_remaps = \"\$(process).out=$output_dir/\$(process).txt\"" >> $submit_file
   echo "request_memory = 2GB" >> $submit_file
   echo "Queue $cnt" >> $submit_file
 
-  condor_submit $submit_file
+  # condor_submit $submit_file
 done
 #
