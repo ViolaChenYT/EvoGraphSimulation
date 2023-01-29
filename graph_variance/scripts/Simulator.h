@@ -174,9 +174,9 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform")
     poisson_distribution<int> poi(fit);
     bernoulli_distribution rolldie(0.5);
 
-    int populations[] = { popsize - 1, 1 };
-
-    int *mutant = new int[popsize];
+    int populations[] = { popsize - 1, 1, 0 }; // no. of WT / good mutant / bad mutant
+    // if no bad mutant, population[1] refers to number of mutants in general
+    int *mutant = new int[popsize]; // 0: WT, -1: neg mutant, 1: pos mutant
     double *fitness = new double[popsize]; 
     // fitness and acc_fitness index follows mutant idx, and same as b/dNode
     double *acc_fit = new double[popsize];
@@ -189,18 +189,25 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform")
     
     //int index2 = popsize - 1;
     int index2 = (int)(rand(generator) * popsize);
+    // setting initial to be good mutant for now
     mutant[index2] = 1;
+    // it can be bad -> -1
     if (dist == "poisson")
         fitness[index2] =  poi(generator);
     else if (dist == "uniform")
         fitness[index2] = fit + s + randsmall(generator);
     else if (dist == "binom"){
         double offset;
-        if (rolldie(generator)){
+        if (mutant[index2] > 0){
             offset = var;
-        } else{
+        } else {
             offset = -var;
         }
+        // if (rolldie(generator)){
+        //     offset = var;
+        // } else{
+        //     offset = -var;
+        // }
         fitness[index2] = fit + s + offset; 
     }
     else if (dist == "left"){
@@ -238,7 +245,10 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform")
     }
     int t = 0;
     // population[0]: no. of WT, pop[1]: no. of mut
-    while (populations[0] != 0 && populations[1] != 0){
+    while (populations[0] != 0 && (populations[1]+populations[2]) != 0){
+        if (t % 50 == 0) {
+            printf("%d\t%d\t%d\n", populations[0],populations[1],populations[2]);
+        }
         ++t;
         double acc = 0;
         // print_fit(fitness);
@@ -261,19 +271,21 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform")
         int* edges = edgelist[birthNode];
         deathNode = edges[deathIndex];
         //printf("birth: %d, death: %d\n", birthNode, deathNode);
-        if (mutant[deathNode] == mutant[birthNode]){
+        if (abs(mutant[deathNode]) == abs(mutant[birthNode])){
             continue;
         }
-        if (mutant[deathNode] == 1){
-            --populations[1];
+        if (abs(mutant[deathNode]) == 1){
+            if (mutant[deathNode] > 0){
+                --populations[1];
+            } else {
+                --populations[2];
+            }
             ++populations[0];
             fitness[deathNode] = fit;
             mutant[deathNode] = 0;
         }
         else {
-            ++populations[1];
             --populations[0];
-            mutant[deathNode] = 1;
             if (dist == "poisson")
                 fitness[deathNode] =  poi(generator);
             else if (dist == "uniform")
@@ -282,8 +294,12 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform")
                 double offset;
                 if (rolldie(generator)){
                     offset = var;
+                    mutant[deathNode] = 1;
+                    ++populations[1];
                 } else{
                     offset = -var;
+                    mutant[deathNode] = -1;
+                    ++populations[2];
                 }
                 fitness[deathNode] = fit + s + offset; 
             }
@@ -358,7 +374,7 @@ void Simulator::simulate(int trials, double s = 0.0, double var = 0, string dist
     for (int i = 0; i < trials; ++i)
     {
         if (i % 20 == 0) {
-            //cout << "." << flush;
+            // cout << "." << flush;
         }
         simulate(s,var,dist);
     }

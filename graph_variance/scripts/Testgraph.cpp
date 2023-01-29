@@ -16,7 +16,7 @@ using namespace std;
 int main(int argc, char **argv)
 {
     if (argc < 6) {
-        //cout << "input format: graph_file | output_filename | num_runs | base fitness | fitness(float) | var in fitness" << endl;
+        cout << "input format: graph_file | output_filename | num_runs | dist | fitness(float) | var in fitness" << endl;
         exit(1);
     }
     

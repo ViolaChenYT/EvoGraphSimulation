@@ -91,6 +91,16 @@ class Graph:
     triangle_list = list(nx.triangles(self.G).values())
     return sum(triangle_list) / 3
   
+  def get_property(self, xfunc, yfunc):
+    x, y = None, None
+    def map(string):
+      if string.startswith("amp"):
+        return self.compute_amplification()
+      elif string.startswith("mix"):
+        return self.compute_mixing_pattern()
+      elif string.startswith("deg"):
+        return np.std(self.degree)
+  
   def show(self):
     nx.draw_networkx(self.G)
     plt.show()
