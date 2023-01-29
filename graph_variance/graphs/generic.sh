@@ -15,14 +15,17 @@ do
   
   printf "" >> $param_file
   let cnt=0
+  n_files=`ls -1q *.txt | wc -l`
   # generate params
-  for file in $input_dir/*
+  for id in {0..$n_files}
+  # file in $input_dir/*
   do
     # echo $file
-    cnt=$((cnt+1))
-    id=$(sed 's/.*\/\(.*\)\..*/\1/' <<< "$file")
-    printf $file >> $param_file
-    printf "\t$output_dir/$id.txt\n" >> $param_file
+    # cnt=$((cnt+1))
+    # id=$(sed 's/.*\/\(.*\)\..*/\1/' <<< "$file")
+    printf "$id.txt" >> $param_file
+    # printf "\t$output_dir/$id.txt\n" >> $param_file
+    printf "\t${id}out.txt\n" >> $param_file
   done
 
   # write script to be run
@@ -46,9 +49,9 @@ do
 
   echo "should_transfer_files = YES" >> $submit_file
   echo "when_to_transfer_output = ON_EXIT" >> $submit_file
-  echo "transfer_input_files=gph, $input_dir/\$(process).txt, $param_file, $output_dir" >> $submit_file
-  echo "transfer_output_files=$output_dir/" >> $submit_file
-  # echo "transfer_output_remaps = \"\$(process).out=$output_dir/\$(process).txt\"" >> $submit_file
+  echo "transfer_input_files=gph, $input_dir/\$(process).txt, $param_file" >> $submit_file
+  # echo "transfer_output_files=$output_dir/" >> $submit_file
+  echo "transfer_output_remaps = \"\$(process).txt=$output_dir/\$(process).txt\"" >> $submit_file
   echo "request_memory = 2GB" >> $submit_file
   echo "Queue $cnt" >> $submit_file
 
