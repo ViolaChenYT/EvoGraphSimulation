@@ -77,7 +77,7 @@ public:
     double fit;
 	Simulator(string, string,double);
     ~Simulator();
-    void simulate(double,double,string);
+    void simulate(double,double,string,int);
     void simulate(int, double,double, string);
     void simulate_dB(double);
     void simulate_dB(int, double);
@@ -165,7 +165,7 @@ double Simulator::sum_over_arr(double* fitness){
     return ans;
 }
 
-void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform")
+void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform", int iter=0)
 {
     this->s = s;
     this->var = var;
@@ -349,6 +349,7 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform")
         ++counts[0];
         times[0] += t;
     }
+    delete populations;
     delete[] mutant;
     delete[] fitness;
     delete[] acc_fit;
@@ -376,7 +377,7 @@ void Simulator::simulate(int trials, double s = 0.0, double var = 0, string dist
         if (i % 20 == 0) {
             // cout << "." << flush;
         }
-        simulate(s,var,dist);
+        simulate(s,var,dist,i);
     }
     
     times[0] /= counts[0];
