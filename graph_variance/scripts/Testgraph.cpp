@@ -29,7 +29,7 @@ int main(int argc, char **argv)
         double s = atof(argv[i]);
         for(int j = 6; j < argc; j++) {
             double var = atof(argv[j]);
-            sim.simulate(runs, s, var, dist=dist);
+            sim.simulate(runs, s, var, dist=dist, log=false);
             // sim.print();
             sim.save();
         }

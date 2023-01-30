@@ -77,8 +77,8 @@ public:
     double fit;
 	Simulator(string, string,double);
     ~Simulator();
-    void simulate(double,double,string,int);
-    void simulate(int, double,double, string);
+    void simulate(double,double,string,int,bool);
+    void simulate(int, double,double, string,bool);
     void simulate_dB(double);
     void simulate_dB(int, double);
     void print();
@@ -165,12 +165,16 @@ double Simulator::sum_over_arr(double* fitness){
     return ans;
 }
 
-void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform", int iter=0)
+void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform", int iter=0, bool record = false)
 {
     this->s = s;
     this->var = var;
     ofstream log;
-    log.open("log%d.txt",iter);
+    if (record) {
+        string logname = "log" + to_string(iter) + ".txt";
+        log.open(logname);
+    }
+    
     uniform_real_distribution<double> rand(0.0, 1.0);
     uniform_real_distribution<double> randsmall(-var, var);
     poisson_distribution<int> poi(fit);
@@ -248,7 +252,7 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform", 
     int t = 0;
     // population[0]: no. of WT, pop[1]: no. of mut
     while (populations[0] != 0 && (populations[1]+populations[2]) != 0){
-        if (t % 50 == 0) {
+        if (record && t % 50 == 0) {
             log << populations[0] << "\t" << populations[1] << "\t" << populations[2] << endl;
         }
         ++t;
@@ -351,14 +355,15 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform", 
         ++counts[0];
         times[0] += t;
     }
-    log.close();
-    delete populations;
+    if (log){
+        log.close();
+    }
     delete[] mutant;
     delete[] fitness;
     delete[] acc_fit;
 }
 // simulate birth-death processes for input trial number of times
-void Simulator::simulate(int trials, double s = 0.0, double var = 0, string dist = "uniform")
+void Simulator::simulate(int trials, double s = 0.0, double var = 0, string dist = "uniform", bool log = "False")
 {
     generator = mt19937((unsigned int)time(NULL));
     clock_t start = clock();
@@ -380,7 +385,7 @@ void Simulator::simulate(int trials, double s = 0.0, double var = 0, string dist
         if (i % 20 == 0) {
             // cout << "." << flush;
         }
-        simulate(s,var,dist,i);
+        simulate(s,var,dist,i,log);
     }
     
     times[0] /= counts[0];
