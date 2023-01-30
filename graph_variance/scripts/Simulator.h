@@ -352,7 +352,7 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform", 
         times[0] += t;
     }
     log.close();
-    // delete populations;
+    delete populations;
     delete[] mutant;
     delete[] fitness;
     delete[] acc_fit;
