@@ -383,7 +383,7 @@ void Simulator::simulate(int trials, double s = 0.0, double var = 0, string dist
     for (int i = 0; i < trials; ++i)
     {
         if (i % 100 == 0) {
-            cout << "." << flush;
+            cout << counts[0] << "\t" << counts[1] << flush;
         }
         simulate(s,var,dist,i,log);
     }
