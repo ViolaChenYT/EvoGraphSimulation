@@ -169,6 +169,8 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform", 
 {
     this->s = s;
     this->var = var;
+    ofstream log;
+    log.open("log%d.txt",iter);
     uniform_real_distribution<double> rand(0.0, 1.0);
     uniform_real_distribution<double> randsmall(-var, var);
     poisson_distribution<int> poi(fit);
@@ -247,7 +249,7 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform", 
     // population[0]: no. of WT, pop[1]: no. of mut
     while (populations[0] != 0 && (populations[1]+populations[2]) != 0){
         if (t % 50 == 0) {
-            printf("%d\t%d\t%d\n", populations[0],populations[1],populations[2]);
+            log << populations[0] << "\t" << populations[1] << "\t" << populations[2] << endl;
         }
         ++t;
         double acc = 0;
@@ -349,7 +351,8 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform", 
         ++counts[0];
         times[0] += t;
     }
-    delete populations;
+    log.close();
+    // delete populations;
     delete[] mutant;
     delete[] fitness;
     delete[] acc_fit;
