@@ -363,7 +363,7 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform", 
     delete[] acc_fit;
 }
 // simulate birth-death processes for input trial number of times
-void Simulator::simulate(int trials, double s = 0.0, double var = 0, string dist = "uniform", bool log = "False")
+void Simulator::simulate(int trials, double s = 0.0, double var = 0, string dist = "uniform", bool log = false)
 {
     generator = mt19937((unsigned int)time(NULL));
     clock_t start = clock();
@@ -382,8 +382,8 @@ void Simulator::simulate(int trials, double s = 0.0, double var = 0, string dist
     cout << s << "\t";
     for (int i = 0; i < trials; ++i)
     {
-        if (i % 20 == 0) {
-            // cout << "." << flush;
+        if (i % 100 == 0) {
+            cout << "." << flush;
         }
         simulate(s,var,dist,i,log);
     }
@@ -496,7 +496,7 @@ void Simulator::simulate_dB(int trials, double s = 0.0)
     
     for (int i = 0; i < trials; ++i)
     {
-        //cout << "run " << i << endl;
+        // cout << "run " << i << endl;
         simulate_dB(s);
     }
     
