@@ -66,6 +66,7 @@ private:
     double var;
 	int *degrees, **edgelist;
 	int counts[2] = { 0, 0 };
+	double mutant_ratio = 0;
 	double times[2] = { 0, 0 };
 	double rt;
     ofstream file;
@@ -167,8 +168,6 @@ double Simulator::sum_over_arr(double* fitness){
 
 void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform", int iter=0, bool record = false)
 {
-    this->s = s;
-    this->var = var;
     ofstream log;
     if (record) {
         string logname = "log" + to_string(iter) + ".txt";
@@ -180,7 +179,7 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform", 
     poisson_distribution<int> poi(fit);
     bernoulli_distribution rolldie(0.5);
 
-    int populations[] = { popsize - 1, 1, 0 }; // no. of WT / good mutant / bad mutant
+    int populations[] = { popsize - 1, 0, 0 }; // no. of WT / good mutant / bad mutant
     // if no bad mutant, population[1] refers to number of mutants in general
     int *mutant = new int[popsize]; // 0: WT, -1: neg mutant, 1: pos mutant
     double *fitness = new double[popsize]; 
@@ -196,7 +195,14 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform", 
     //int index2 = popsize - 1;
     int index2 = (int)(rand(generator) * popsize);
     // setting initial to be good mutant for now
-    mutant[index2] = 1;
+    //
+    if (rolldie(generator)){
+    	mutant[index2] = 1;
+	populations[1] ++;
+    } else {
+    	mutant[index2] = -1;
+	populations[2] ++;
+    }
     // it can be bad -> -1
     if (dist == "poisson")
         fitness[index2] =  poi(generator);
@@ -209,11 +215,6 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform", 
         } else {
             offset = -var;
         }
-        // if (rolldie(generator)){
-        //     offset = var;
-        // } else{
-        //     offset = -var;
-        // }
         fitness[index2] = fit + s + offset; 
     }
     else if (dist == "left"){
@@ -250,12 +251,13 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform", 
         fitness[index2] = fit + s + offset;
     }
     int t = 0;
+
     // population[0]: no. of WT, pop[1]: no. of mut
-    while (populations[0] != 0 && (populations[1]+populations[2]) != 0){
-        if (record && t % 50 == 0) {
-            log << populations[0] << "\t" << populations[1] << "\t" << populations[2] << endl;
+    while (populations[0] != 0 && (populations[1]+populations[2] != 0)){
+        if (t % 100 == 0) {
+            // cout << populations[0] << "\t" << populations[1] << "\t" << populations[2] << endl;
         }
-        ++t;
+        t++;
         double acc = 0;
         // print_fit(fitness);
         // calculate accummulated fitness
@@ -270,7 +272,7 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform", 
         birthNode = binsearch(acc_fit,0,popsize-1,birth);
         //printf("birthnode, %d -- %.2f\n", birthNode, birth);
         if (birthNode == -1){
-            printf("f\n");
+            printf("yeeeeeeeet\n");
             print_fit(acc_fit);
         }
         deathIndex = (int)(degrees[birthNode] * rand(generator));
@@ -345,12 +347,15 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform", 
         }
     }
     
-    if (populations[0] == 0)
+    if (populations[0] == 0) // fixation
     {
         ++counts[1];
         times[1] += t;
+	double one_time_ratio = populations[1] / double(populations[1] + populations[2]);
+	cout << one_time_ratio << endl;
+	mutant_ratio += one_time_ratio;
     }
-    else
+    else // extinction
     {
         ++counts[0];
         times[0] += t;
@@ -372,6 +377,7 @@ void Simulator::simulate(int trials, double s = 0.0, double var = 0, string dist
     counts[1] = 0;
     times[0] = 0;
     times[1] = 0;
+    mutant_ratio = 0.0;
     cout << dist << "\t";
     file << dist << "\t";
     file << fit << "\t";
@@ -382,8 +388,8 @@ void Simulator::simulate(int trials, double s = 0.0, double var = 0, string dist
     cout << s << "\t";
     for (int i = 0; i < trials; ++i)
     {
-        if (i % 100 == 0) {
-            cout << counts[0] << "\t" << counts[1] << flush;
+        if (i % 1000 == 0) {
+            // cout << counts[0] << "\t" << counts[1] << "\t" << flush;
         }
         simulate(s,var,dist,i,log);
     }
@@ -515,8 +521,8 @@ void Simulator::print(){
 void Simulator::save()
 {
     double total = counts[0] + counts[1];
-    file << counts[1]/total << endl;
-    cout << counts[1]/total << endl;
+    file << counts[1]/total << "\t" << mutant_ratio/double(counts[1]) << endl;
+    cout << counts[1]/total << "\t" << mutant_ratio/double(counts[1]) << endl;
     /* file << s << "\t";
     file << var << "\t";
     file << counts[0] << "\t";
