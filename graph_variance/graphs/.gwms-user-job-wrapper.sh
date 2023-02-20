@@ -1,4 +1,12 @@
 #!/bin/bash
+
+# This script is started just before the user job
+# It is referenced by the USER_JOB_WRAPPER
+
+export HOME=$PWD
+
+
+#!/bin/bash
 # GlideinWMS singularity wrapper. Invoked by HTCondor as user_job_wrapper
 # default_singularity_wrapper USER_JOB [job options and arguments]
 EXITSLEEP=10m
@@ -883,3 +891,6 @@ exec "$@"
 error=$?
 # exec failed. Log, communicate to HTCondor, avoid black hole and exit
 exit_wrapper "exec failed  (Singularity:$GWMS_SINGULARITY_REEXEC, exit code:$error): $*" $error
+
+# Condor job wrappers must replace its own image
+exec ""$@""

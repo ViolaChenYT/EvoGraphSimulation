@@ -4,7 +4,7 @@ input_dir=$1
 
 for idx in {1..5}
 do
-  output_dir="rslt_${input_dir}${idx}"
+  output_dir="rslt1_${input_dir}${idx}"
   script="$input_dir${idx}.sh"
   param_file="$input_dir${idx}.param.in"
   submit_file="$input_dir${idx}.submit"
@@ -35,7 +35,7 @@ do
   echo 'x=$(sed "${i}q;d"' $param_file "| awk '{print \$1}')" >> $script
   echo 'y=$(sed "${i}q;d"' $param_file "| awk '{print \$2}')" >> $script
   echo "dist=binom" >> $script
-  echo './gph $x $y 500000 $dist 0.1 0.0 0.9' >> $script
+  echo './gph $x $y 200000 $dist 0.1 0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9' >> $script
   chmod +x $script
 
   # write the submit file
