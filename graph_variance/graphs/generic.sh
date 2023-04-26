@@ -4,7 +4,7 @@ input_dir=$1
 
 for idx in {1..5}
 do
-  output_dir="rslt4_${input_dir}${idx}"
+  output_dir="rslt_${input_dir}${idx}"
   script="$input_dir${idx}.sh"
   param_file="$input_dir${idx}.param.in"
   submit_file="$input_dir${idx}.submit"
