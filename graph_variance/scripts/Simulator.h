@@ -352,7 +352,7 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform", 
         ++counts[1];
         times[1] += t;
 	double one_time_ratio = populations[1] / double(populations[1] + populations[2]);
-	cout << one_time_ratio << endl;
+	//cout << one_time_ratio << endl;
 	mutant_ratio += one_time_ratio;
     }
     else // extinction

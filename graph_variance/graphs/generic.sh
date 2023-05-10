@@ -4,7 +4,7 @@ input_dir=$1
 
 for idx in {1..5}
 do
-  output_dir="rslt025_${input_dir}${idx}"
+  output_dir="rslt001_${input_dir}${idx}"
   script="$input_dir${idx}.sh"
   param_file="$input_dir${idx}.param.in"
   submit_file="$input_dir${idx}.submit"
@@ -35,7 +35,7 @@ do
   echo 'x=$(sed "${i}q;d"' $param_file "| awk '{print \$1}')" >> $script
   echo 'y=$(sed "${i}q;d"' $param_file "| awk '{print \$2}')" >> $script
   echo "dist=binom" >> $script
-  echo './gph $x $y 100000 $dist 0.25 0.0 0.01 0.02 0.03 0.05 0.07 0.08 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9' >> $script
+  echo './gph $x $y 100000 $dist 0.01 0.0 0.01 0.02 0.03 0.05 0.07 0.08 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9' >> $script
   chmod +x $script
 
   # write the submit file
@@ -44,7 +44,7 @@ do
   echo 'Arguments = $(process)' >> $submit_file
 
   echo 'Error = log/osgJob$(process).err' >> $submit_file
-  echo "Output = $output_dir/"'$(process).out' >> $submit_file
+  echo "Output = log/"'$(process).out' >> $submit_file
   echo 'Log = log/osgJob$(process).log' >> $submit_file
 
   echo "should_transfer_files = YES" >> $submit_file
