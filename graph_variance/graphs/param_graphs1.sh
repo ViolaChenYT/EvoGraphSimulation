@@ -4,4 +4,4 @@ i=$((i+1))
 x=$(sed "${i}q;d" param_graphs1.param.in | awk '{print $1}')
 y=$(sed "${i}q;d" param_graphs1.param.in | awk '{print $2}')
 dist=binom
-./gph $x $y 100000 $dist 0.01 0.0 0.01 0.02 0.03 0.05 0.07 0.08 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9
+./gph $x $y 150000 $dist 0.020 0.0 0.316 0.447 0.548 0.632 0.707 0.775 0.837 0.894 0.949
