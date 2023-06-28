@@ -194,7 +194,6 @@ void Simulator::simulate(double s = 0, double var = 0, string dist = "uniform", 
     
     //int index2 = popsize - 1;
     int index2 = (int)(rand(generator) * popsize);
-    // setting initial to be good mutant for now
     //
     if (rolldie(generator)){
     	mutant[index2] = 1;
