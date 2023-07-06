@@ -2,11 +2,11 @@
 
 input_dir=$1
 
-s="001"
+s="025"
 
 for idx in {1..5}
 do
-  output_dir="result${s}_${input_dir}${idx}"
+  output_dir="result_0307_${s}_${input_dir}${idx}"
   script="$input_dir${idx}.sh"
   param_file="$input_dir${idx}.param.in"
   submit_file="$input_dir${idx}.submit"
