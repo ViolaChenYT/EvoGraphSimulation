@@ -2,11 +2,11 @@
 
 input_dir=$1
 
-s="025"
+s="1"
 
 for idx in {1..5}
 do
-  output_dir="result_0307_${s}_${input_dir}${idx}"
+  output_dir="result_0903_${s}_${input_dir}${idx}"
   script="$input_dir${idx}.sh"
   param_file="$input_dir${idx}.param.in"
   submit_file="$input_dir${idx}.submit"
@@ -37,7 +37,7 @@ do
   echo 'x=$(sed "${i}q;d"' $param_file "| awk '{print \$1}')" >> $script
   echo 'y=$(sed "${i}q;d"' $param_file "| awk '{print \$2}')" >> $script
   echo "dist=binom" >> $script
-  echo './gph $x $y 250000 $dist 0.'$s' 0.0 0.316 0.447 0.548 0.632 0.707 0.775 0.837 0.894 0.949'  >> $script
+  echo './gph $x $y 250000 $dist -0.'$s' 0.0 0.316 0.447 0.548 0.632 0.707 0.775 0.837 0.894 0.949'  >> $script
   chmod +x $script
 
   # write the submit file
